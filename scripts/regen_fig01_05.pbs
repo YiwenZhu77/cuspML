@@ -1,0 +1,25 @@
+#!/bin/bash
+#PBS -N regen_figs
+#PBS -A P28100045
+#PBS -q casper
+#PBS -l select=1:ncpus=8:mem=32GB
+#PBS -l walltime=00:30:00
+#PBS -o /glade/work/yizhu/cuspML/scripts/regen_figs.log
+#PBS -e /glade/work/yizhu/cuspML/scripts/regen_figs.err
+#PBS -j oe
+
+source ~/.claude/scripts/conda-init.sh py3.10
+
+cd /glade/work/yizhu/cuspML/scripts
+python generate_figures.py
+
+# Copy regenerated fig01-05 to paper/figures and slides/figures
+for fig in fig01_data_coverage.png fig02_scatter_4panel.png fig03_baseline_comparison.png fig04_error_distribution.png fig05_feature_importance.png; do
+    if [ -f /glade/work/yizhu/cuspML/figures/$fig ]; then
+        cp /glade/work/yizhu/cuspML/figures/$fig /glade/work/yizhu/cuspML/paper/figures/$fig
+        cp /glade/work/yizhu/cuspML/figures/$fig /glade/work/yizhu/cuspML/slides/figures/$fig
+        echo "Copied $fig"
+    fi
+done
+
+echo "Done. Check /glade/work/yizhu/cuspML/scripts/regen_figs.log"

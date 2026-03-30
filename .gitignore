@@ -1,0 +1,29 @@
+# Data (too large for git)
+output/
+dse_results/
+figures/
+repl_out/
+__pycache__/
+*.pkl
+*.pyc
+*.log
+
+# Paper build artifacts
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.pdf
+paper/main_cn*
+paper/main_backup*
+paper/main_cleantext.txt
+
+# Keep paper source
+!paper/main.tex
+!paper/references.bib
+!paper/VERIFIED_DATA.md
+!paper/PAPER_IMPROVEMENT_LOG.md

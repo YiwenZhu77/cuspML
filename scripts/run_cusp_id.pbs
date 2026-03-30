@@ -1,0 +1,21 @@
+#!/bin/bash
+#PBS -N cusp_id
+#PBS -A P28100045
+#PBS -q main
+#PBS -l walltime=04:00:00
+#PBS -l select=1:ncpus=4:mem=16GB
+#PBS -j oe
+#PBS -o /glade/work/yizhu/cuspML/output/cusp_id_${SAT}_${YEAR}.log
+
+# Usage: qsub -v SAT=F16,YEAR=2010 scripts/run_cusp_id.pbs
+
+source /glade/u/home/yizhu/work/miniconda3/etc/profile.d/conda.sh
+conda activate py3.10
+
+cd /glade/work/yizhu/cuspML
+
+python3 src/identify_cusp.py \
+    --satellite ${SAT} \
+    --start ${YEAR}-01-01 \
+    --end ${YEAR}-12-31 \
+    --output-dir output
