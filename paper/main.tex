@@ -35,11 +35,11 @@
 \end{keypoints}
 
 \begin{abstract}
-The ionospheric cusp marks the narrow latitude band where magnetosheath plasma directly enters the magnetosphere, and its latitude tracks the state of solar wind--magnetosphere coupling. Existing empirical models predict cusp latitude from one or two solar wind parameters with linear regression; on individual crossings they reach only $r \approx 0.56$--$0.58$. We present the first machine learning model for predicting DMSP along-track cusp precipitation boundaries, trained on 39,668 DMSP cusp crossings (1987--2014, satellites F06--F18) matched with 74 solar wind and IMF features from OMNI, including 15-, 30-, and 60-minute historical statistics. XGBoost predicts the equatorward cusp boundary latitude with MAE = 1.11\textdegree{} under temporal holdout and $1.26 \pm 0.19$\textdegree{} under leave-one-year-out cross-validation ($r = 0.886$ on random splits)---a 46\% MAE reduction over \citet{newell2006cusp} (MAE = 1.80\textdegree). The poleward boundary, equatorward MLT, and mean MLT are predicted with MAE = 0.95\textdegree{}, 0.77~hr, and 0.73~hr, respectively (random splits). The 60-minute mean Newell coupling function ($d\Phi_{MP}/dt$) alone accounts for $\sim$31\% of gain-based feature importance; 60-minute features outperform all shorter timescales. Partial dependence analysis recovers known physical relationships, including the $\sim$0.05\textdegree/\textdegree{} dipole tilt slope and the nonlinear coupling function dependence. Gradient-boosted trees (XGBoost, GBR) outperform all tested neural network architectures (MLP, ResMLP, Transformer), consistent with the established advantage of tree-based models on tabular data. All 74 inputs are derivable from upstream solar wind monitors, suggesting that solar wind measurements carry substantial predictive information about cusp boundary position.
+The ionospheric cusp marks the narrow latitude band where magnetosheath plasma enters the magnetosphere along open field lines. Its equatorward boundary latitude shifts with the dayside reconnection rate, yet existing empirical models based on one or two coupling functions capture only a modest fraction of the crossing-to-crossing scatter ($r \approx 0.56$--$0.58$). We trained an XGBoost model on $\sim$40{,}000 Defense Meteorological Satellite Program (DMSP) cusp crossings spanning 1987--2014, using solar wind and interplanetary magnetic field (IMF) measurements together with their 15-, 30-, and 60-minute running statistics as inputs. The model predicts equatorward boundary latitude with a mean absolute error (MAE) of $\sim$1\textdegree{}, cutting the error of the \citet{newell2006cusp} linear baseline nearly in half. Leave-one-year-out cross-validation yields MAE = $1.26 \pm 0.19$\textdegree{} across 23 held-out years. Feature importance and partial dependence analyses show that the 60-minute mean Newell coupling function is the dominant predictor and that the model recovers established physical relationships, including the dipole tilt dependence and the nonlinear saturation of the coupling function. Because every input is available from upstream monitors at the Sun--Earth L1 point, the model is suitable for real-time cusp boundary forecasting.
 \end{abstract}
 
 \section*{Plain Language Summary}
-Near the magnetic poles there is a narrow funnel---the cusp---through which solar wind plasma pours straight into the upper atmosphere. Its position shifts constantly, and getting that position wrong matters: GPS signals scintillate in the cusp, satellites experience extra drag, and polar-route aircrew face higher radiation doses. Until now the best predictions came from plugging one or two solar wind numbers into a simple formula, which explained only about half the crossing-to-crossing scatter. We took a different tack. We fed 27~years of DMSP satellite passes ($\sim$40{,}000 cusp crossings) into an XGBoost model together with 74 solar wind and IMF measurements---not just snapshots, but how each quantity changed over the preceding hour. The result: cusp latitude predicted to within $\sim$1\textdegree, cutting the error almost in half compared with earlier methods. What the model ``learned'' on its own agrees with decades of physics: cusp latitude tracks the reconnection rate integrated over roughly the past hour, not the solar wind you see right now. Because every input comes from upstream monitors already flying at L1, there is a clear path toward real-time cusp forecasting.
+Near the magnetic poles there is a narrow funnel---the cusp---through which solar wind plasma pours straight into the upper atmosphere. Its position shifts constantly, and getting that position wrong matters: GPS signals scintillate in the cusp, satellites experience extra drag, and polar-route aircrew face higher radiation doses. Until now the best predictions came from plugging one or two solar wind numbers into a simple formula, which explained only about half the crossing-to-crossing scatter. We approached this differently. We fed 27~years of DMSP satellite passes ($\sim$40{,}000 cusp crossings) into an XGBoost model together with 74 solar wind and IMF measurements---not just snapshots, but how each quantity changed over the preceding hour. The result: cusp latitude predicted to within $\sim$1\textdegree, cutting the error almost in half compared with earlier methods. What the model ``learned'' on its own agrees with decades of physics: cusp latitude tracks the reconnection rate integrated over roughly the past hour, not the solar wind you see right now. Because every input comes from upstream monitors already flying at L1, there is a clear path toward real-time cusp forecasting.
 
 % ======================================================================
 \section{Introduction}
@@ -48,13 +48,13 @@ Near the magnetic poles there is a narrow funnel---the cusp---through which sola
 
 \subsection{The Ionospheric Cusp and Its Importance}
 
-The polar cusp is a narrow region of the dayside magnetosphere where the geomagnetic field topology permits direct entry of magnetosheath plasma into the ionosphere \cite{pitout2021cluster}. At low altitudes ($\sim$840~km), a DMSP satellite crossing through the cusp typically detects a narrow swath ($\sim$1--2\textdegree{} MLAT) of soft particle precipitation---a subset of the full cusp region, which extends over $\sim$3--4\textdegree{} MLAT and several hours of MLT \cite{zhang2013lfm}, identifiable by ion energies below 3~keV, electron energies below 220~eV, and elevated ion fluxes exceeding $2 \times 10^7$~eV/(cm$^2$~s~sr~eV) \cite{newell1988cusp}. The cusp is a direct indicator of solar wind--magnetosphere coupling: its equatorward boundary moves to lower latitudes during periods of enhanced dayside magnetic reconnection and returns poleward when reconnection weakens \cite{newell2006cusp, newell2007coupling}.
+The polar cusp is a narrow region on the dayside where the geomagnetic field allows magnetosheath plasma to enter the ionosphere directly \cite{pitout2021cluster}. At $\sim$840~km altitude, a DMSP pass through the cusp sees a $\sim$1--2\textdegree{} MLAT band of soft particle precipitation \cite{newell1988cusp}: ion energies below 3~keV, electron energies below 220~eV, and ion fluxes above $2 \times 10^7$~eV/(cm$^2$~s~sr~eV). The full cusp spans $\sim$3--4\textdegree{} MLAT and several hours of MLT \cite{zhang2013lfm, wing2005kp}. Its equatorward boundary shifts to lower latitudes when dayside reconnection is strong and moves back poleward when reconnection weakens \cite{newell2006cusp, newell2007coupling}.
 
 Knowing where the cusp is matters in practice. GPS scintillation is enhanced in the cusp region due to ionospheric irregularities driven by soft precipitation and associated Joule heating \cite{pitout2021cluster}. Low-Earth-orbit satellites experience increased drag near the cusp due to thermospheric upwelling. The cusp is also relevant to radiation exposure of polar-route aviation and to the interpretation of ground-based radar and magnetometer data. Yet no operational model currently predicts cusp location from upstream solar wind data.
 
 \subsection{Existing Cusp Location Models}
 
-The most thorough empirical study of cusp latitude prediction was performed by \citet{newell2006cusp}, who tested 10 solar wind coupling functions against DMSP cusp crossings from 1984--2005. They found that the ``intermediate'' merging electric field $E_{WAV} = v B_T \sin^4(\theta_c/2)$ achieved the highest correlation ($r = 0.81$, binned data; $r \approx 0.56$ for individual crossings). The nonlinear fit $\Lambda_c = -3.65 \times 10^{-2} E_{WAV}^{2/3} + 77.2$\textdegree{} further improved the correlation to $r = 0.83$ (binned). Critically, their best results used IMF data averaged over a 60-minute window, indicating that cusp latitude responds to the time-integrated reconnection rate rather than the instantaneous solar wind.
+\citet{newell2006cusp} tested 10 coupling functions against DMSP cusp crossings from 1984--2005. The ``intermediate'' merging electric field $E_{WAV} = v B_T \sin^4(\theta_c/2)$ gave the best correlation: $r = 0.81$ on binned data, $r \approx 0.56$ on individual crossings. A nonlinear fit ($\Lambda_c = -3.65 \times 10^{-2} E_{WAV}^{2/3} + 77.2$\textdegree) pushed the binned correlation to $r = 0.83$. Their best results came from IMF data averaged over 60~minutes, pointing to the time-integrated reconnection rate rather than instantaneous values as the controlling quantity.
 
 \citet{newell2007coupling} subsequently proposed the nearly universal coupling function $d\Phi_{MP}/dt = v^{4/3} B_T^{2/3} \sin^{8/3}(\theta_c/2)$, representing the rate of magnetic flux opening at the magnetopause. This function achieved $r = 0.845$ against $\sin(\Lambda_c)$ for cusp latitude (binned) and outperformed all other coupling functions across 10 different magnetospheric state variables.
 
@@ -64,9 +64,9 @@ Global MHD simulations can reproduce cusp dynamics \cite{connor2015mhd, zhang201
 
 \subsection{Machine Learning in Space Physics}
 
-Machine learning methods have been increasingly applied to space physics prediction problems \citep{camporeale2019challenge}. \citet{feng2025auroral} used XGBoost to predict auroral oval boundaries from Kp and found that gradient-boosted trees outperformed neural networks. \citet{aghabozorgi2024magnetopause} applied machine learning to magnetopause location prediction, demonstrating the potential of data-driven approaches while noting the limitations imposed by OMNI solar wind propagation uncertainties. More broadly, \citet{grinsztajn2022tree} showed that tree-based models systematically outperform deep learning on typical tabular datasets, a finding with direct relevance to the structured solar wind parameter spaces considered here.
+Machine learning has found growing use in space physics \citep{camporeale2019challenge, bortnik2021ml}. \citet{feng2025auroral} predicted auroral oval boundaries with XGBoost using Kp as input and found tree-based models outperformed neural networks. \citet{aghabozorgi2024magnetopause} applied ML to magnetopause standoff distance, with results limited mainly by OMNI propagation uncertainty. \citet{grinsztajn2022tree} showed more generally that tree-based models beat deep learning on tabular data---the kind of structured input we deal with here.
 
-Cusp location prediction, however, has not yet been tackled with ML. The problem has two properties that make tree-based learning attractive. First, the cusp latitude depends on several solar wind parameters at once, and those dependencies are nonlinear---hard for a one- or two-parameter formula to represent. Second, what the solar wind did over the past hour matters as much as what it is doing now, because the magnetosphere takes roughly an hour to reconfigure after an IMF change.
+Cusp location prediction, however, has not yet been tackled with ML. Two properties of this problem favor tree-based methods. First, the cusp latitude depends on several solar wind parameters at once, and those dependencies are nonlinear---hard for a one- or two-parameter formula to represent. Second, what the solar wind did over the past hour matters as much as what it is doing now, because the magnetosphere takes roughly an hour to reconfigure after an IMF change.
 
 \subsection{Present Study}
 
@@ -75,7 +75,7 @@ In this paper, we present the first machine learning prediction of cusp precipit
 \begin{enumerate}
 \item An XGBoost model achieving MAE = 1.11\textdegree{} under temporal holdout ($1.26 \pm 0.19$\textdegree{} under leave-one-year-out) for equatorward cusp MLAT ($r = 0.886$ on random splits), a 46\% improvement over the best linear coupling function on the same dataset.
 \item Demonstration that 60-minute history features dominate prediction, which matches the expectation that cusp latitude tracks $\sim$1-hour integrated reconnection.
-\item Feature importance (SHAP, gain) and partial dependence analysis recover known physical relationships and expose nonlinear interactions that single-coupling-function models miss.
+\item Gain-based feature importance, confirmed by SHAP, and partial dependence analysis recover known physical relationships and expose nonlinear interactions that single-coupling-function models miss.
 \item Gradient-boosted trees outperform MLP, ResMLP, and TabTransformer on this tabular prediction problem.
 \item All 74 inputs are derivable from upstream solar wind monitors, which means upstream solar wind data alone carry enough information to predict cusp boundary position with sub-degree accuracy.
 \end{enumerate}
@@ -89,7 +89,7 @@ Section~\ref{sec:data} describes the data and methods; Section~\ref{sec:results}
 
 \subsection{DMSP Cusp Database}
 
-We use cusp crossing identifications from the Defense Meteorological Satellite Program (DMSP) satellites F06 through F18, spanning 1987--2014 (27 years, approximately 2.5 solar cycles). The DMSP satellites fly in sun-synchronous polar orbits at $\sim$840~km altitude, carrying the SSJ/4 (F06--F15) and SSJ/5 (F16--F18) precipitating particle detectors that measure electron and ion differential energy fluxes from 30~eV to 30~keV across 19 logarithmically spaced energy channels.
+We use cusp crossing identifications from the Defense Meteorological Satellite Program (DMSP) satellites F06 through F18, spanning 1987--2014 (27 years, approximately 2.5 solar cycles). The DMSP satellites fly in sun-synchronous polar orbits at $\sim$840~km altitude, carrying the SSJ/4 and SSJ/5 precipitating particle spectrometers \citep{hardy1984ssj4, redmon2017dmsp} that measure electron and ion differential energy fluxes from 30~eV to 30~keV across 19 logarithmically spaced energy channels.
 
 Cusp crossings are identified using the criteria established by \citet{newell1988cusp}:
 \begin{enumerate}
@@ -99,14 +99,14 @@ Cusp crossings are identified using the criteria established by \citet{newell198
 \item Ion spectral flux peak between 100 and 7,000~eV
 \end{enumerate}
 
-For each crossing we record the equatorward and poleward boundary MLAT and MLT. These mark the along-track extent of cusp precipitation---a one-dimensional slice at the MLT of the satellite pass. The equatorward boundary approximates the open--closed field line boundary \cite{newell2006cusp, anderson2024cusp}, though DMSP precipitation-based identification can deviate from the true boundary far from noon or during complex reconnection geometries. Coordinates are AACGM. Of the 48,056 crossings in the raw database, 39,668 remain after removing records with missing solar wind data. About 90\% of crossings are in the Northern Hemisphere.
+For each crossing we record the equatorward and poleward boundary MLAT and MLT. These mark the along-track extent of cusp precipitation---a one-dimensional slice at the MLT of the satellite pass. The equatorward boundary approximates the open--closed field line boundary \cite{newell2006cusp, anderson2024cusp}, though DMSP precipitation-based identification can deviate from the true boundary far from noon or during complex reconnection geometries. Following \citet{anderson2024cusp}, we restrict the identification to 0830--1530~MLT to exclude skimming passes that cut the cusp at shallow angles and may produce unreliable poleward boundaries. Coordinates are Altitude-Adjusted Corrected Geomagnetic (AACGM-v2; \citealt{shepherd2014aacgm}). Of the 48,056 crossings in the raw database, 39,668 remain after removing records with missing solar wind data. About 90\% of crossings are in the Northern Hemisphere.
 
-Figure~\ref{fig:data_coverage} shows the temporal (panel a, color-coded by satellite) and spatial (panel b, MLAT-MLT polar plot) distribution of the dataset.
+Figure~\ref{fig:data_coverage} shows the temporal (panel a, color-coded by satellite) and spatial (panels b--c, MLAT-MLT polar plots for each hemisphere) distribution of the dataset.
 
 \begin{figure}[htbp]
 \centering
 \noindent\includegraphics[width=0.9\textwidth]{figures/fig01_data_coverage.png}
-\caption{Dataset overview. (a) Number of cusp crossings per year, color-coded by DMSP satellite (F06--F18). (b) Polar plot of crossing locations in MLAT-MLT coordinates, colored by hemisphere (blue: North; red: South).}
+\caption{Dataset overview. (a) Number of cusp crossings per year, color-coded by DMSP satellite (F06--F18). (b) Northern Hemisphere crossing locations ($n = 36{,}805$) and (c) Southern Hemisphere crossing locations ($n = 4{,}008$) in MLAT-MLT polar coordinates.}
 \label{fig:data_coverage}
 \end{figure}
 
@@ -171,16 +171,16 @@ This ladder allows us to attribute performance gains to: (a) richer predictor se
 
 \subsection{Interpretability Methods}
 
-To ensure physical interpretability, we employ three complementary methods: (1) XGBoost's built-in gain-based feature importance, which quantifies each feature's contribution to reducing the loss function across all trees; (2) partial dependence plots, which show the marginal effect of each feature on the prediction, averaged over all other features; and (3) SHAP (SHapley Additive exPlanations; \citealt{lundberg2017shap}) values, which provide theoretically grounded, per-prediction feature attributions based on cooperative game theory. Because several features are strongly correlated (e.g., $vB_s$ and $d\Phi_{MP}/dt$), SHAP and partial dependence values reflect marginal rather than causal contributions and should be read accordingly.
+To ensure physical interpretability, we employ two primary methods: (1) XGBoost's built-in gain-based feature importance, which quantifies each feature's contribution to reducing the loss function across all trees; and (2) partial dependence plots, which show the marginal effect of each feature on the prediction, averaged over all other features. As a cross-check on the gain ranking, we also compute SHAP (SHapley Additive exPlanations; \citealt{lundberg2017shap}) values on a subset of test-set samples; SHAP provides theoretically grounded, per-prediction feature attributions based on cooperative game theory. Because several features are strongly correlated (e.g., $vB_s$ and $d\Phi_{MP}/dt$), importance and partial dependence values reflect marginal rather than causal contributions and should be read accordingly.
 
 % ======================================================================
 \section{Results}
 \label{sec:results}
 % ======================================================================
 
-\subsection{Overall Model Performance}
+\subsection{Model Performance and Comparison With Baselines}
 
-Table~\ref{tab:performance} summarizes the XGBoost model's performance on the held-out test set for all four prediction targets. The equatorward boundary latitude is predicted with MAE = 0.97\textdegree{} and $r = 0.886$, while the poleward boundary achieves MAE = 0.95\textdegree{} and similar correlation. MLT predictions achieve MAE values of 0.77~hr (eq\_MLT) and 0.73~hr (mean\_MLT), with lower $R^2$ values (0.48 and 0.51) because the cusp's MLT distribution is intrinsically narrow.
+Table~\ref{tab:performance} summarizes the XGBoost model's performance on the held-out test set for all four prediction targets. The equatorward boundary latitude is predicted with MAE = 0.97\textdegree{} and $r = 0.886$, while the poleward boundary achieves MAE = 0.95\textdegree{} and similar correlation. MLT predictions achieve MAE values of 0.77~hr (eq\_MLT) and 0.73~hr (mean\_MLT), with lower $R^2$ values (0.48 and 0.51) because the cusp's MLT distribution is intrinsically narrow. Scatter plots of predicted versus observed values appear in Figure~\ref{fig:scatter}, with color encoding point density. For both MLAT targets (panels a, b), points cluster tightly around the 1:1 line over the full 62--82\textdegree{} range. The MLT panels (c, d) bunch near 12~MLT, as one would expect from the cusp's noon-sector concentration.
 
 \begin{table}[htbp]
 \centering
@@ -198,8 +198,6 @@ mean MLT (hr) & 0.73 & 0.98 & 0.49 & 0.709 \\
 \end{tabular}
 \end{table}
 
-Scatter plots of predicted versus observed values appear in Figure~\ref{fig:scatter}, with color encoding point density. For both MLAT targets (panels a, b), points cluster tightly around the 1:1 line over the full 62--82\textdegree{} range. The MLT panels (c, d) bunch near 12~MLT, as one would expect from the cusp's noon-sector concentration.
-
 \begin{figure}[htbp]
 \centering
 \noindent\includegraphics[width=\textwidth]{figures/fig02_scatter_4panel.png}
@@ -207,13 +205,7 @@ Scatter plots of predicted versus observed values appear in Figure~\ref{fig:scat
 \label{fig:scatter}
 \end{figure}
 
-\subsection{Comparison With Existing Models}
-
-Figure~\ref{fig:baseline} lines up the equatorward MLAT MAE across models of increasing complexity. Starting from a single-variable linear fit on $B_z$ (MAE = 2.04\textdegree), switching to the Newell coupling function brings the MAE down to 1.80\textdegree. Fitting the same coupling function with Newell's nonlinear form ($\Lambda_c = a \, E_{WAV}^{2/3} + b$) offers almost no further gain: 1.80\textdegree, $r = 0.586$. XGBoost cuts the error nearly in half, to 0.97\textdegree{} on the test set---a 46\% drop.
-
-The 46\% MAE reduction under random splits persists as a 40\% reduction under temporal holdout (1.11\textdegree{} vs.\ 1.80\textdegree). Bootstrap resampling yields $[0.95, 0.99]$\textdegree{} CI for XGBoost ($p < 0.001$), though temporal autocorrelation among crossings means these CIs are likely too narrow.
-
-The widely cited $r = 0.78$--$0.83$ from \citet{newell2006cusp} were computed on \textit{binned} data; on individual crossings the Newell coupling function reaches only $r \approx 0.58$. Our $r = 0.887$ on individual crossings is considerably higher.
+Figure~\ref{fig:baseline} lines up the equatorward MLAT MAE across models of increasing complexity. Starting from a single-variable linear fit on $B_z$ (MAE = 2.04\textdegree), switching to the Newell coupling function brings the MAE down to 1.80\textdegree. Fitting the same coupling function with Newell's nonlinear form ($\Lambda_c = a \, E_{WAV}^{2/3} + b$) offers almost no further gain: 1.80\textdegree, $r = 0.586$. XGBoost cuts the error nearly in half, to 0.97\textdegree{} on the test set---a 46\% drop. The 46\% MAE reduction under random splits persists as a 40\% reduction under temporal holdout (1.11\textdegree{} vs.\ 1.80\textdegree). Bootstrap resampling yields $[0.95, 0.99]$\textdegree{} CI for XGBoost ($p < 0.001$), though temporal autocorrelation among crossings means these CIs are likely too narrow. The widely cited $r = 0.78$--$0.83$ from \citet{newell2006cusp} were computed on \textit{binned} data; on individual crossings the Newell coupling function reaches only $r \approx 0.58$. Our $r = 0.887$ on individual crossings is considerably higher.
 
 \begin{figure}[htbp]
 \centering
@@ -222,11 +214,7 @@ The widely cited $r = 0.78$--$0.83$ from \citet{newell2006cusp} were computed on
 \label{fig:baseline}
 \end{figure}
 
-\subsection{Error Distribution}
-
-Figure~\ref{fig:error_dist} shows how the equatorward-boundary prediction errors are distributed. The residuals are roughly Gaussian, centered near zero (mean bias $< 0.03$\textdegree{} in magnitude, standard deviation 1.34\textdegree). Most predictions land close to the observations: 63\% within 1\textdegree, 89\% within 2\textdegree, and only 3\% exceed 3\textdegree.
-
-Note that these prediction errors should be interpreted in the context of the cusp's spatial scale. While a single DMSP crossing typically detects $\sim$1--2\textdegree{} of cusp precipitation along its track, the full cusp region extends over $\sim$3--4\textdegree{} MLAT and several hours of MLT \cite{zhang2013lfm}. The equatorward boundary latitude itself varies over a $\sim$14\textdegree{} range (65--80\textdegree{}) depending on solar wind conditions. The model explains $R^2 = 0.79$ of the test-set variance in equatorward MLAT.
+The residuals (Figure~\ref{fig:error_dist}) are roughly Gaussian, centered near zero (mean bias $< 0.03$\textdegree{} in magnitude, standard deviation 1.34\textdegree). Most predictions land close to the observations: 63\% within 1\textdegree, 89\% within 2\textdegree, and only 3\% exceed 3\textdegree. These errors should be interpreted in the context of the cusp's spatial scale: the full cusp region extends over $\sim$3--4\textdegree{} MLAT \cite{zhang2013lfm}, while the equatorward boundary itself varies over a $\sim$14\textdegree{} range (65--80\textdegree{}) depending on solar wind conditions.
 
 \begin{figure}[htbp]
 \centering
@@ -235,11 +223,9 @@ Note that these prediction errors should be interpreted in the context of the cu
 \label{fig:error_dist}
 \end{figure}
 
-\subsection{Feature Importance}
+\subsection{Feature Importance, Timescale Dependence, and Partial Dependence}
 
-Figure~\ref{fig:importance} displays the gain-based feature importance for the top 20 features in the equatorward MLAT model. The 60-minute mean Newell coupling function (\texttt{newell\_cf\_mean60}) is the most important feature by gain, followed by $vB_s$ mean over 60 minutes, the 60-minute integral of $vB_s$, and the 60-minute integral of the Newell coupling function. Together, the four 60-minute coupling function features account for over 55\% of total gain-based importance. Gain-based importance can overweight features with high cardinality or many splits, so the SHAP analysis in the next section offers a per-prediction attribution that is less prone to this bias.
-
-The dominance of 60-minute features over shorter timescales is physically meaningful. \citet{newell2006cusp} independently found that their correlation was optimized using a 60$\pm$5 minute averaging window, and \citet{burton1975dst} showed that the ring current (and by extension the overall magnetospheric configuration) responds to solar wind driving with a characteristic timescale of $\sim$60 minutes. Our feature importance analysis provides evidence consistent with prior physical understanding that the cusp responds to the time-integrated reconnection rate on approximately this timescale.
+Figure~\ref{fig:importance} displays the gain-based feature importance for the top 20 features in the equatorward MLAT model. The 60-minute mean Newell coupling function (\texttt{newell\_cf\_mean60}) is the most important feature by gain, followed by $vB_s$ mean over 60 minutes, the 60-minute integral of $vB_s$, and the 60-minute integral of the Newell coupling function. Together, the four 60-minute coupling function features account for over 55\% of total gain-based importance. As a cross-check, we computed SHAP \citep{lundberg2017shap} values on 2{,}000 test-set samples. The SHAP ranking agrees with gain: the 60-minute mean coupling function has the largest mean absolute SHAP value (1.07\textdegree), followed by dipole tilt (0.32\textdegree) and 15-minute mean $B_z$ (0.23\textdegree). Gain-based importance can overweight features with high cardinality, so this agreement lends confidence to the ranking.
 
 \begin{figure}[htbp]
 \centering
@@ -248,20 +234,7 @@ The dominance of 60-minute features over shorter timescales is physically meanin
 \label{fig:importance}
 \end{figure}
 
-\subsection{SHAP Feature Attribution}
-
-We also ran SHAP \citep{lundberg2017shap} on 2{,}000 test-set samples. The ranking largely agrees with gain: the 60-minute mean coupling function again comes out on top (mean $|\text{SHAP}| = 1.07$\textdegree), with dipole tilt (0.32\textdegree) and 15-minute mean $B_z$ (0.23\textdegree) second and third. Figure~\ref{fig:shap} shows SHAP dependence curves for these three features: the coupling function saturates at large values, tilt has the expected $\sim$0.05\textdegree/\textdegree{} slope, and southward $B_z$ pushes the cusp equatorward while northward $B_z$ does almost nothing. All three methods---gain, SHAP, PDP---paint a similar picture, but none can disentangle causation from correlation when the predictors covary as strongly as they do here.
-
-\begin{figure}[htbp]
-\centering
-\noindent\includegraphics[width=0.95\textwidth]{figures/fig13_shap_dependence.png}
-\caption{SHAP dependence plots for the three most important features: 60-min mean Newell coupling function ($d\Phi_{MP}/dt$, left), dipole tilt (center), and 15-min mean IMF $B_z$ (right). Each point is one test-set sample; color indicates an automatically selected interaction feature.}
-\label{fig:shap}
-\end{figure}
-
-\subsection{Timescale Dependence}
-
-How far back in solar wind history does the model need to look? To answer this, we trained five separate XGBoost models, each given a different window of history (Figure~\ref{fig:timescale}). With instantaneous features alone the MAE is 1.27\textdegree. Adding 15 minutes of history drops it to 1.08\textdegree; 30 minutes reaches 1.02\textdegree; and 60 minutes gets to 0.99\textdegree. Throwing in all three windows together (the full 74-feature model) barely improves on the 60-minute-only result: 0.97\textdegree{} versus 0.99\textdegree. The 60-minute window clearly dominates, in line with the $\sim$1-hour magnetospheric reconfiguration timescale \cite{burton1975dst, newell2006cusp}.
+The dominance of 60-minute features is confirmed by an ablation experiment (Figure~\ref{fig:timescale}). With instantaneous features alone the MAE is 1.27\textdegree. Adding 15 minutes of history drops it to 1.08\textdegree; 30 minutes reaches 1.02\textdegree; and 60 minutes gets to 0.99\textdegree. Combining all three windows (the full 74-feature model) adds little over the 60-minute-only result: 0.97\textdegree{} versus 0.99\textdegree. The 60-minute window clearly dominates, in line with the $\sim$1-hour magnetospheric reconfiguration timescale \cite{burton1975dst, newell2006cusp}.
 
 \begin{figure}[htbp]
 \centering
@@ -270,11 +243,7 @@ How far back in solar wind history does the model need to look? To answer this, 
 \label{fig:timescale}
 \end{figure}
 
-\subsection{Partial Dependence Analysis}
-
-Figure~\ref{fig:partial_dep} shows partial dependence plots for six key features, revealing the marginal effect of each variable on the predicted equatorward MLAT (after averaging over all other features).
-
-The partial dependence on dipole tilt (panel a) shows a negative slope of approximately $-0.05$\textdegree/\textdegree, in excellent agreement with the $-0.06$\textdegree/\textdegree{} reported by \citet{newell1989tilt} and the $-0.046$\textdegree/\textdegree{} found by \citet{anderson2024cusp} for the Northern Hemisphere. The dependence on the 60-minute Newell coupling function (panel b) is strongly nonlinear, consistent with the $E_{WAV}^{2/3}$ dependence found by \citet{newell2006cusp}: the cusp moves equatorward rapidly at low coupling function values and saturates at high values. The IMF $B_z$ dependence (panel c) shows the expected asymmetry, with strong equatorward displacement for southward IMF ($B_z < 0$) and weak poleward return for northward IMF. Dynamic pressure (panel d) produces a weak equatorward shift at high values, consistent with magnetopause compression \cite{shue1997magnetopause}. The IMF $B_y$ dependence (panel e) is approximately symmetric around zero, as expected since $B_y$ primarily affects MLT rather than MLAT. The $vB_s$ dependence (panel f) shows a monotonically increasing equatorward displacement with increasing half-wave-rectified southward IMF driving.
+Figure~\ref{fig:partial_dep} shows partial dependence plots for six key features, revealing the marginal effect of each variable on the predicted equatorward MLAT (after averaging over all other features). The partial dependence on dipole tilt (panel a) shows a negative slope of approximately $-0.05$\textdegree/\textdegree, in excellent agreement with the $-0.06$\textdegree/\textdegree{} reported by \citet{newell1989tilt} and the $-0.046$\textdegree/\textdegree{} found by \citet{anderson2024cusp} for the Northern Hemisphere. The dependence on the 60-minute Newell coupling function (panel b) is strongly nonlinear, consistent with the $E_{WAV}^{2/3}$ dependence found by \citet{newell2006cusp}: the cusp moves equatorward rapidly at low coupling function values and saturates at high values. The IMF $B_z$ dependence (panel c) shows the expected asymmetry, with strong equatorward displacement for southward IMF ($B_z < 0$) and weak poleward return for northward IMF. Dynamic pressure (panel d) produces a weak equatorward shift at high values, consistent with magnetopause compression \cite{shue1997magnetopause}. The IMF $B_y$ dependence (panel e) is approximately symmetric around zero, as expected since $B_y$ primarily affects MLT rather than MLAT. The $vB_s$ dependence (panel f) shows a monotonically increasing equatorward displacement with increasing half-wave-rectified southward IMF driving.
 
 \begin{figure}[htbp]
 \centering
@@ -282,10 +251,6 @@ The partial dependence on dipole tilt (panel a) shows a negative slope of approx
 \caption{Partial dependence plots showing the marginal effect of six key features on predicted equatorward MLAT. (a) Dipole tilt, (b) 60-min mean Newell coupling function, (c) IMF $B_z$, (d) dynamic pressure, (e) IMF $B_y$, (f) 60-min mean $vB_s$.}
 \label{fig:partial_dep}
 \end{figure}
-
-\subsection{Performance Across Dipole Tilt Bins}
-
-To assess whether model performance is uniform across dipole tilt conditions, we divide the test set into six tilt bins and compute MAE within each. The MAE ranges from 0.87\textdegree{} in the $[-35, -20)$\textdegree{} bin to 1.15\textdegree{} in the $[20, 35)$\textdegree{} bin. The elevated MAE at large positive tilt (summer Northern Hemisphere, $n = 467$) may reflect sampling imbalance or genuine physical complexity at extreme tilt angles. Overall, the model performs comparably across the full tilt range, with no evidence of systematic overfitting in any particular bin.
 
 \subsection{Model Architecture Comparison}
 
@@ -300,37 +265,22 @@ Neural network architectures were evaluated on the \texttt{omni\_hist} subset ($
 \label{fig:model_comp}
 \end{figure}
 
-\subsection{Hemispheric and Geomagnetic Activity Dependence}
+\subsection{Robustness and Generalization}
 
-Figure~\ref{fig:hemi_ae} examines model performance across hemispheres and geomagnetic activity levels. The Northern Hemisphere ($n \approx 7{,}180$ test samples, 90\% of the test set) achieves MAE = 0.93\textdegree{} and $r = 0.889$, while the Southern Hemisphere ($n \approx 754$ test samples, 10\%) achieves MAE = 1.29\textdegree{} and $r = 0.865$ (panels a--b). The higher Southern Hemisphere MAE partly reflects the smaller training sample size in that hemisphere, which constitutes only $\sim$10\% of all DMSP cusp crossings in the dataset. This strong hemispheric imbalance is a practical limitation on the generalizability of the results to Southern Hemisphere conditions; predictions in the Southern Hemisphere should be treated with greater caution than Northern Hemisphere estimates.
-
-Panels (c)--(d) of Figure~\ref{fig:hemi_ae} examine how performance varies with geomagnetic activity. During quiet conditions (AE $< 100$~nT), the model achieves MAE = 0.96\textdegree, comparable to moderate activity (100--300~nT; MAE = 0.92\textdegree). Performance degrades during high auroral/substorm activity (AE $\geq 500$~nT), where MAE increases to 1.16\textdegree---a 25\% degradation relative to moderate activity. Note that AE is an auroral electrojet index; the threshold AE $\geq 500$~nT marks intense substorm activity, which often accompanies but does not directly define geomagnetic storms as defined by the Dst index.
-
-The higher MAE during disturbed conditions has several likely sources: rapid magnetopause erosion and nonlinear saturation of the cusp latitude response \citep{pitout2021cluster}, flux transfer events that produce minute-scale boundary jumps, and amplified OMNI propagation uncertainty during rapidly varying IMF \citep{lockwood2022pitfalls}.
-
-Despite these challenges, the model still achieves MAE $\approx 1.16$\textdegree{} during high-activity intervals---well below the linear baseline MAE of 1.80\textdegree{} even during quiet times. The 60-minute history features evidently encode enough information about storm-time cusp dynamics to keep the error well below the linear baseline, even though minute-scale processes (e.g., individual FTEs) remain beyond what upstream monitoring can resolve.
+\textbf{Hemispheric and geomagnetic activity dependence.} Figure~\ref{fig:hemi_ae} examines model performance across hemispheres and geomagnetic activity levels. The Northern Hemisphere ($n \approx 7{,}180$ test samples, 90\% of the test set) achieves MAE = 0.93\textdegree{} and $r = 0.889$, while the Southern Hemisphere ($n \approx 754$ test samples, 10\%) achieves MAE = 1.29\textdegree{} and $r = 0.865$ (panels a--b). The higher Southern Hemisphere MAE partly reflects the smaller training sample size in that hemisphere, which constitutes only $\sim$10\% of all DMSP cusp crossings in the dataset. Panel (c) shows that performance degrades during high auroral/substorm activity (AE $\geq 500$~nT), where MAE increases to 1.16\textdegree---a 25\% degradation relative to moderate activity (100--300~nT; MAE = 0.92\textdegree). The higher MAE during disturbed conditions has several likely sources: rapid magnetopause erosion \citep{pitout2021cluster}, flux transfer events that produce minute-scale boundary jumps, and amplified OMNI propagation uncertainty \citep{lockwood2022pitfalls}. Despite these challenges, the model still achieves MAE $\approx 1.16$\textdegree{} during high-activity intervals---well below the linear baseline MAE of 1.80\textdegree.
 
 \begin{figure}[htbp]
 \centering
-\noindent\includegraphics[width=0.8\textwidth]{figures/fig10_hemisphere.png}\\[6pt]
-\noindent\includegraphics[width=0.8\textwidth]{figures/fig11_ae_dependence.png}
-\caption{Model performance stratified by hemisphere and geomagnetic activity. (a)--(b) Observed versus predicted equatorward MLAT for Northern and Southern Hemisphere crossings, respectively. (c) MAE by AE activity bin with sample counts annotated. (d) Scatter of individual prediction errors versus AE, showing increased dispersion during storm conditions.}
+\noindent\includegraphics[width=\textwidth]{figures/fig10_hemi_ae.png}
+\caption{Model performance stratified by hemisphere and geomagnetic activity. (a)--(b) Observed versus predicted equatorward MLAT for Northern and Southern Hemisphere crossings, respectively. (c) MAE by AE activity bin with sample counts annotated.}
 \label{fig:hemi_ae}
 \end{figure}
 
-\subsection{Temporal Generalization}
+\textbf{Dipole tilt dependence.} To assess whether model performance is uniform across tilt conditions, we divide the test set into six tilt bins and compute MAE within each. The MAE ranges from 0.87\textdegree{} in the $[-35, -20)$\textdegree{} bin to 1.15\textdegree{} in the $[20, 35)$\textdegree{} bin. The elevated MAE at large positive tilt (summer Northern Hemisphere, $n = 467$) may reflect sampling imbalance or genuine physical complexity at extreme tilt angles. Overall, the model performs comparably across the full tilt range.
 
-A natural worry with 27~years of data is that the model simply memorizes satellite- or epoch-specific quirks. Two tests address this.
+\textbf{Temporal generalization.} With 27~years of multi-satellite data, the model could in principle memorize satellite- or epoch-specific patterns. Leave-one-year-out (LOYO) cross-validation yields a mean MAE of $1.26 \pm 0.19$\textdegree{} across 23 held-out years ($n \geq 100$), with the worst individual year (1992) reaching MAE $\approx 1.7$\textdegree. A temporal split (train on pre-2008, test on 2008--2014) gives MAE = 1.11\textdegree, only 14\% higher than the random-split MAE. Both tests confirm that the model captures genuine solar wind--cusp relationships that generalize across solar cycles.
 
-\textbf{Leave-One-Year-Out (LOYO) cross-validation.} We train the model on all years except one and evaluate on the held-out year, repeating for each year in the 1987--2014 period. Two years with very few crossings (1988, $n=6$; 1990, $n=23$) are excluded from the aggregate statistics as their per-year MAEs are unreliable at these sample sizes. For the remaining 23 years ($n \geq 100$), the mean LOYO MAE is $1.26 \pm 0.19$\textdegree, with the worst individual year (1992) reaching MAE $\approx 1.7$\textdegree. The modest degradation relative to the random-split MAE of 0.97\textdegree{} is expected, since random splitting allows the model to learn from temporally adjacent data. The LOYO results confirm that the model captures genuine solar wind--cusp relationships that generalize across solar cycles, rather than exploiting temporal autocorrelation.
-
-\textbf{Temporal split.} We train on all crossings before 2008 and test on 2008--2014, simulating a strict forward-looking deployment scenario. The temporal-split MAE is 1.11\textdegree, only 14\% higher than the random-split MAE, which indicates that the learned physical relationships hold across the transition from Solar Cycle~23 to Cycle~24.
-
-\subsection{Label Uncertainty and Irreducible Error}
-
-The residual MAE of $\sim$1\textdegree{} raises the question of how much prediction error is irreducible---i.e., attributable to combined observational and geophysical variability rather than model limitations. To estimate this variability in the cusp boundary labels, we identify cases where multiple DMSP crossings occurred within the same 0.5-hour MLT bin on the same calendar day (including crossings from both the same and different satellites on successive orbits). A total of 9{,}679 such multi-crossing groups exist in the dataset. The standard deviation of $|$eq MLAT$|$ within these groups is $1.03 \pm 1.01$\textdegree, and the mean range is 2.35\textdegree.
-
-This within-group spread of $\sim$1\textdegree{} represents an upper bound on combined observational and geophysical crossing-to-crossing variability. The spread includes both real cusp variability on sub-hour timescales (e.g., FTE-driven boundary oscillations and spatial MLT structure within the group) and satellite orbit-path differences. It therefore should not be interpreted as a clean observational noise floor; rather, it captures the total crossing-to-crossing spread including genuine physical variability. Nonetheless, the fact that the model MAE of 0.97\textdegree{} (or 1.11\textdegree{} under temporal holdout) is comparable to this within-group spread suggests that much of the remaining error is geophysical variability---boundary fluctuations that no upstream solar wind model can predict---rather than a shortcoming of the model itself.
+\textbf{Label uncertainty and irreducible error.} To estimate crossing-to-crossing variability in the cusp boundary labels, we identify 9{,}679 multi-crossing groups (same calendar day, same 0.5-hr MLT bin). The within-group standard deviation of $|$eq MLAT$|$ is $1.03 \pm 1.01$\textdegree, and the mean range is 2.35\textdegree. This spread represents an upper bound on combined observational and geophysical variability, including real cusp variability on sub-hour timescales and satellite orbit-path differences. The fact that the model MAE of 0.97\textdegree{} (or 1.11\textdegree{} under temporal holdout) is comparable to this within-group spread suggests that much of the remaining error is geophysical variability that no upstream solar wind model can predict.
 
 % ======================================================================
 \section{Discussion}
@@ -343,7 +293,7 @@ The dominant role of the 60-minute mean Newell coupling function in our model ha
 
 \citet{newell2006cusp} independently found that their coupling function correlations were optimized with a 60$\pm$5 minute averaging window, attributing this to the time required for the magnetosphere to reconfigure in response to changed IMF conditions. \citet{lockwood2019coupling} further demonstrated that transpolar voltage---closely related to cusp latitude---responds to the time-integrated reconnection rate with a similar characteristic timescale.
 
-Our feature importance analysis is consistent with this picture: the 60-minute features consistently outperform shorter timescales (Figure~\ref{fig:timescale}), and the 60-minute mean coupling function has the highest gain-based importance ($\sim$31\%) and the largest mean absolute SHAP value (1.07\textdegree). These two complementary attribution methods, along with the timescale ablation study (Section~\ref{sec:results}), converge qualitatively on the same conclusion. None of these three methods---gain, SHAP, PDP---can establish causation when predictors are correlated. They do, however, point consistently at the same timescale, and that timescale matches prior reconnection-cycle estimates.
+Our feature importance analysis is consistent with this picture: the 60-minute features consistently outperform shorter timescales (Figure~\ref{fig:timescale}), and the 60-minute mean coupling function has the highest gain-based importance ($\sim$31\%) and the largest mean absolute SHAP value (1.07\textdegree). The gain ranking, the SHAP analysis, and the timescale ablation (Section~\ref{sec:results}) all point to the same window. None of these three methods---gain, SHAP, PDP---can establish causation when predictors are correlated. They do, however, point consistently at the same timescale, and that timescale matches prior reconnection-cycle estimates.
 
 \subsection{Why XGBoost Outperforms Linear Models}
 
@@ -375,9 +325,9 @@ Linear regression (1 feature) & 1 & $<0.1$~s (CPU) & $<0.1$~ms \\
 Ridge regression (74 features) & 74 & $<0.1$~s (CPU) & $<0.1$~ms \\
 GBR-300 (depth 5) & $\sim$300K leaf nodes & $\sim$90~s (CPU) & 0.1~ms (batch) \\
 XGBoost-1000 & $\sim$1M leaf nodes & $\sim$80~s (8 CPU) & 0.04~ms (batch) \\
-MLP-gelu & 20,068 & $\sim$11~s (V100) & $\sim$2~ms \\
-ResMLP-4blk-128 & 142,468 & $\sim$36~s (V100) & $\sim$5~ms \\
-TabTransformer-d128-L2 & 416,260 & $\sim$136~s (V100) & $\sim$10~ms \\
+MLP-gelu & 20,068 & $\sim$11~s (NVIDIA V100 GPU) & $\sim$2~ms \\
+ResMLP-4blk-128 & 142,468 & $\sim$36~s (NVIDIA V100 GPU) & $\sim$5~ms \\
+TabTransformer-d128-L2 & 416,260 & $\sim$136~s (NVIDIA V100 GPU) & $\sim$10~ms \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -417,10 +367,10 @@ Natural extensions include solar-cycle cross-validation, focused evaluation on e
 The authors declare no conflicts of interest relevant to this study.
 
 \section*{Data Availability Statement}
-The DMSP SSJ/4 and SSJ/5 particle precipitation data are publicly available from the NOAA National Centers for Environmental Information (NCEI; \url{https://www.ncei.noaa.gov/products/space-weather/dmsp-ssj}). The OMNI solar wind and IMF data were obtained from the NASA Goddard Space Flight Center OMNIWeb interface (\url{https://omniweb.gsfc.nasa.gov}; \citealt{king2005omni}). The cusp crossing database (48,056 events, 1987--2014) and trained XGBoost model weights are archived at Zenodo (\url{https://doi.org/10.5281/zenodo.19340793}). Analysis code is available at \url{https://github.com/YiwenZhu77/cuspML}.
+The DMSP SSJ/4 and SSJ/5 particle precipitation data are publicly available from the NOAA National Centers for Environmental Information (NCEI; \url{https://www.ncei.noaa.gov/data/dmsp-space-weather-sensors/}). The OMNI solar wind and IMF data were obtained from the NASA Goddard Space Flight Center OMNIWeb interface (\url{https://omniweb.gsfc.nasa.gov}; \citealt{king2005omni}). The cusp crossing database (48,056 events, 1987--2014) and trained XGBoost model weights are archived at Zenodo (\url{https://doi.org/10.5281/zenodo.19340793}). Analysis code is available at \url{https://github.com/YiwenZhu77/cuspML}.
 
 \section*{Acknowledgments}
-The DMSP SSJ/4 and SSJ/5 data were obtained from the NCEI. The OMNI data were obtained from the NASA Goddard Space Flight Center OMNIWeb interface. This work utilized the NCAR Derecho supercomputer, supported by the National Science Foundation.
+The DMSP SSJ/4 and SSJ/5 data were obtained from the NCEI. The OMNI data were obtained from the NASA Goddard Space Flight Center OMNIWeb interface. This work is supported by NASA DRIVE Science Center for Geospace Storms Grant 80NSSC22M0163. We also acknowledge the use of computational resources at the National Center for Atmospheric Research (NCAR)-Wyoming Supercomputing Center provided by the National Science Foundation and the State of Wyoming, and supported by NCAR's Computational and Information Systems Laboratory.
 
 \bibliography{references}
 
