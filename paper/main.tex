@@ -26,10 +26,10 @@
 
 \affiliation{1}{Department of Physics and Astronomy, Rice University, Houston, TX, USA}
 
-\correspondingauthor{F. Toffoletto}{toffo@rice.edu}
+\correspondingauthor{Yiwen Zhu}{yz167@rice.edu}
 
 \begin{keypoints}
-\item XGBoost predicts DMSP along-track equatorward cusp MLAT with MAE = 1.11\textdegree{} under temporal holdout (r = 0.886 on random splits), a 46\% MAE improvement over the best linear coupling function
+\item XGBoost predicts DMSP along-track equatorward cusp magnetic latitude (MLAT) with mean absolute error (MAE) = 1.11\textdegree{} under temporal holdout (r = 0.886 on random splits), a 46\% MAE improvement over the best linear coupling function
 \item The 60-minute mean Newell coupling function accounts for $\sim$31\% of gain-based feature importance, supporting the interpretation that cusp latitude responds to time-integrated reconnection over the preceding hour
 \item Model skill degrades by 25\% during high auroral activity (AE $\geq$ 500~nT) but remains well below the linear baseline at all activity levels
 \end{keypoints}
@@ -39,7 +39,7 @@ The ionospheric cusp marks the narrow latitude band where magnetosheath plasma e
 \end{abstract}
 
 \section*{Plain Language Summary}
-Near the magnetic poles there is a narrow funnel---the cusp---through which solar wind plasma pours straight into the upper atmosphere. Its position shifts constantly, and getting that position wrong matters: GPS signals scintillate in the cusp, satellites experience extra drag, and polar-route aircrew face higher radiation doses. Until now the best predictions came from plugging one or two solar wind numbers into a simple formula, which explained only about half the crossing-to-crossing scatter. We approached this differently. We fed 27~years of DMSP satellite passes ($\sim$40{,}000 cusp crossings) into an XGBoost model together with 74 solar wind and IMF measurements---not just snapshots, but how each quantity changed over the preceding hour. The result: cusp latitude predicted to within $\sim$1\textdegree, cutting the error almost in half compared with earlier methods. What the model ``learned'' on its own agrees with decades of physics: cusp latitude tracks the reconnection rate integrated over roughly the past hour, not the solar wind you see right now. Because every input comes from upstream monitors already flying at L1, there is a clear path toward real-time cusp forecasting.
+Near the magnetic poles there is a narrow funnel---the cusp---through which solar wind plasma pours straight into the upper atmosphere. Its position shifts constantly, and getting that position wrong matters: GPS signals scintillate in the cusp, satellites experience extra drag, and polar-route aircrew face higher radiation doses. Until now the best predictions came from plugging one or two solar wind numbers into a simple formula, which explained only about half the crossing-to-crossing scatter. We approached this differently. We fed 27~years of DMSP satellite passes ($\sim$40{,}000 cusp crossings) into an XGBoost model together with 74 solar wind and IMF measurements---not just snapshots, but how each quantity changed over the preceding hour. The result: the cusp latitude is predicted to within $\sim$1\textdegree, cutting the error almost in half compared with earlier methods. What the model ``learned'' on its own agrees with decades of physics: cusp latitude tracks the reconnection rate integrated over roughly the past hour, not the solar wind you see right now. Because every input comes from upstream monitors already flying at L1, there is a clear path toward real-time cusp forecasting.
 
 % ======================================================================
 \section{Introduction}
@@ -48,15 +48,15 @@ Near the magnetic poles there is a narrow funnel---the cusp---through which sola
 
 \subsection{The Ionospheric Cusp and Its Importance}
 
-The polar cusp is a narrow region on the dayside where the geomagnetic field allows magnetosheath plasma to enter the ionosphere directly \cite{pitout2021cluster}. At $\sim$840~km altitude, a DMSP pass through the cusp sees a $\sim$1--2\textdegree{} MLAT band of soft particle precipitation \cite{newell1988cusp}: ion energies below 3~keV, electron energies below 220~eV, and ion fluxes above $2 \times 10^7$~eV/(cm$^2$~s~sr~eV). The full cusp spans $\sim$3--4\textdegree{} MLAT and several hours of MLT \cite{zhang2013lfm, wing2005kp}. Its equatorward boundary shifts to lower latitudes when dayside reconnection is strong and moves back poleward when reconnection weakens \cite{newell2006cusp, newell2007coupling}.
+The polar cusp is a narrow region on the dayside where the geomagnetic field allows magnetosheath plasma to enter the ionosphere directly \cite{pitout2021cluster}. At $\sim$840~km altitude, a DMSP pass through the cusp sees a $\sim$1--2\textdegree{} MLAT band of soft particle precipitation \cite{newell1988cusp}, with ion energies below 3~keV, electron energies below 220~eV, and ion fluxes above $2 \times 10^7$~eV/(cm$^2$~s~sr~eV). The full cusp spans $\sim$3--4\textdegree{} MLAT and several hours of MLT \cite{zhang2013lfm, wing2005kp}. Its equatorward boundary shifts to lower latitudes when dayside reconnection is strong and moves back poleward when reconnection weakens \cite{newell2006cusp, newell2007coupling}.
 
 Knowing where the cusp is matters in practice. GPS scintillation is enhanced in the cusp region due to ionospheric irregularities driven by soft precipitation and associated Joule heating \cite{pitout2021cluster}. Low-Earth-orbit satellites experience increased drag near the cusp due to thermospheric upwelling. The cusp is also relevant to radiation exposure of polar-route aviation and to the interpretation of ground-based radar and magnetometer data. Yet no operational model currently predicts cusp location from upstream solar wind data.
 
 \subsection{Existing Cusp Location Models}
 
-\citet{newell2006cusp} tested 10 coupling functions against DMSP cusp crossings from 1984--2005. The ``intermediate'' merging electric field $E_{WAV} = v B_T \sin^4(\theta_c/2)$ gave the best correlation: $r = 0.81$ on binned data, $r \approx 0.56$ on individual crossings. A nonlinear fit ($\Lambda_c = -3.65 \times 10^{-2} E_{WAV}^{2/3} + 77.2$\textdegree) pushed the binned correlation to $r = 0.83$. Their best results came from IMF data averaged over 60~minutes, pointing to the time-integrated reconnection rate rather than instantaneous values as the controlling quantity.
+\citet{newell2006cusp} tested 10 coupling functions against DMSP cusp crossings from 1984--2005. The ``intermediate'' merging electric field $E_{WAV} = v B_T \sin^4(\theta_c/2)$, where $v$ is the solar wind speed, $B_T = \sqrt{B_y^2 + B_z^2}$ is the transverse IMF magnitude, and $\theta_c = \arctan(B_y/B_z)$ is the IMF clock angle, gave the best correlation: $r = 0.81$ on binned data, $r \approx 0.56$ on individual crossings. A nonlinear fit ($\Lambda_c = -3.65 \times 10^{-2} E_{WAV}^{2/3} + 77.2$\textdegree), where $\Lambda_c$ is the cusp latitude, pushed the binned correlation to $r = 0.83$. Their best results came from IMF data averaged over 60~minutes, pointing to the time-integrated reconnection rate rather than instantaneous values as the controlling quantity.
 
-\citet{newell2007coupling} subsequently proposed the nearly universal coupling function $d\Phi_{MP}/dt = v^{4/3} B_T^{2/3} \sin^{8/3}(\theta_c/2)$, representing the rate of magnetic flux opening at the magnetopause. This function achieved $r = 0.845$ against $\sin(\Lambda_c)$ for cusp latitude (binned) and outperformed all other coupling functions across 10 different magnetospheric state variables.
+\citet{newell2007coupling} subsequently proposed the nearly universal coupling function $d\Phi_{MP}/dt = v^{4/3} B_T^{2/3} \sin^{8/3}(\theta_c/2)$, representing the rate of magnetic flux opening at the magnetopause ($\Phi_{MP}$). This function achieved $r = 0.845$ against $\sin(\Lambda_c)$ for cusp latitude (binned) and outperformed all other coupling functions across 10 different magnetospheric state variables.
 
 \citet{newell1989tilt} established that dipole tilt angle shifts the cusp equatorward at a rate of approximately $-0.06$\textdegree/\textdegree{} of tilt. More recently, \citet{anderson2024cusp} used a 40-year, 41,000-crossing DMSP database to demonstrate that the tilt dependence varies with MLT sector and IMF $B_y$ sign, reflecting the asymmetric influence of $B_y$ on reconnection geometry \cite{cowley1981imfby}.
 
@@ -64,7 +64,7 @@ Global MHD simulations can reproduce cusp dynamics \cite{connor2015mhd, zhang201
 
 \subsection{Machine Learning in Space Physics}
 
-Machine learning has found growing use in space physics \citep{camporeale2019challenge, bortnik2021ml}. \citet{feng2025auroral} predicted auroral oval boundaries with XGBoost using Kp as input and found tree-based models outperformed neural networks. \citet{aghabozorgi2024magnetopause} applied ML to magnetopause standoff distance, with results limited mainly by OMNI propagation uncertainty. \citet{grinsztajn2022tree} showed more generally that tree-based models beat deep learning on tabular data---the kind of structured input we deal with here.
+Machine learning (ML) has found growing use in space physics \citep{camporeale2019challenge, bortnik2021ml}. \citet{feng2025auroral} predicted auroral oval boundaries with XGBoost using Kp as input and found tree-based models outperformed neural networks. \citet{aghabozorgi2024magnetopause} applied ML to magnetopause standoff distance, with results limited mainly by OMNI propagation uncertainty. \citet{grinsztajn2022tree} showed more generally that tree-based models beat deep learning on tabular data---the kind of structured input we deal with here.
 
 Cusp location prediction, however, has not yet been tackled with ML. Two properties of this problem favor tree-based methods. First, the cusp latitude depends on several solar wind parameters at once, and those dependencies are nonlinear---hard for a one- or two-parameter formula to represent. Second, what the solar wind did over the past hour matters as much as what it is doing now, because the magnetosphere takes roughly an hour to reconfigure after an IMF change.
 
@@ -305,7 +305,7 @@ The 46\% MAE reduction achieved by XGBoost over the best linear coupling functio
 
 \textbf{Historical context.} Linear models typically use instantaneous or single-window-averaged solar wind measurements. Our 74-feature set provides the model with information about how the solar wind has evolved over the preceding hour at multiple timescales, enabling it to infer the magnetospheric state more completely than any single snapshot can provide.
 
-\citet{lockwood2022pitfalls} warned about overfitting in coupling function studies. Our model is evaluated on data never seen during training, and the feature importance hierarchy (coupling functions $>$ IMF $>$ tilt $>$ pressure) is physically sensible. Five-fold CV stability (MAE = $0.96 \pm 0.01$\textdegree) further supports generalization.
+\citet{lockwood2022pitfalls} warned about overfitting in coupling function studies. Our model is evaluated on data never seen during training, and the feature importance hierarchy (coupling functions $>$ IMF $>$ tilt $>$ pressure) is physically sensible. Five-fold CV stability (MAE = $0.96 \pm 0.01$\textdegree) further supports this generalization.
 
 \subsection{Operational Potential and Limitations}
 
@@ -361,7 +361,7 @@ We have presented the first machine learning model for predicting ionospheric cu
 \item \textbf{Solar wind predictability:} All 74 inputs are derivable from upstream solar wind monitors, so the solar wind alone provides enough information to predict along-track cusp boundary position with sub-degree precision. Full operational deployment would require validation with real-time L1 data, reliable gap-handling for 60-minute history windows, and extension to the two-dimensional cusp structure.
 \end{enumerate}
 
-Natural extensions include solar-cycle cross-validation, focused evaluation on extreme storms, and expansion to 2-D cusp maps using multi-satellite constellations. The trained model and database will be released through Zenodo on acceptance.
+Natural extensions include solar-cycle cross-validation, focused evaluation on extreme storms, and expansion to 2-D cusp maps using multi-satellite constellations.
 
 \section*{Conflict of Interest}
 The authors declare no conflicts of interest relevant to this study.
