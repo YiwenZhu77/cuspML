@@ -8,22 +8,16 @@ __pycache__/
 *.pyc
 *.log
 
-# Paper build artifacts
-paper/*.aux
-paper/*.bbl
-paper/*.blg
-paper/*.fls
-paper/*.fdb_latexmk
-paper/*.log
-paper/*.out
-paper/*.synctex.gz
-paper/*.pdf
-paper/main_cn*
-paper/main_backup*
-paper/main_cleantext.txt
+# Paper (lives in separate cuspML_paper repo)
+paper/
 
-# Keep paper source
-!paper/main.tex
-!paper/references.bib
-!paper/VERIFIED_DATA.md
-!paper/PAPER_IMPROVEMENT_LOG.md
+# Other local artifacts not part of the source distribution
+papers/
+slides/
+notes/
+aris/
+*.pptx
+*.zip
+AUTO_REVIEW*.md
+PAPER_PLAN.md
+IDEA_REPORT.md
