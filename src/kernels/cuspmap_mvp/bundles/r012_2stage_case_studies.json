@@ -1,0 +1,62 @@
+{
+  "summary": {
+    "case1_strong_south_Bz": {
+      "stage1_p": 0.09459459781646729,
+      "stage2_peak_p": 0.01876978762447834,
+      "combined_peak_p": 0.0017755205044522882,
+      "combined_peak_lat": 71.0,
+      "combined_peak_mlt": 11.5,
+      "combined_midnight_mean": 3.2550042305956595e-06
+    },
+    "case2_strong_north_Bz": {
+      "stage1_p": 0.017699114978313446,
+      "stage2_peak_p": 0.3440420627593994,
+      "combined_peak_p": 0.006089239846915007,
+      "combined_peak_lat": 81.0,
+      "combined_peak_mlt": 11.0,
+      "combined_midnight_mean": 6.950106694603164e-07
+    },
+    "case3_strong_By_pos": {
+      "stage1_p": 0.10648148506879807,
+      "stage2_peak_p": 0.19718310236930847,
+      "combined_peak_p": 0.020996348932385445,
+      "combined_peak_lat": 75.0,
+      "combined_peak_mlt": 11.5,
+      "combined_midnight_mean": 4.005845767096616e-06
+    },
+    "case4_strong_By_neg": {
+      "stage1_p": 0.10999999940395355,
+      "stage2_peak_p": 0.1384820193052292,
+      "combined_peak_p": 0.015233022160828114,
+      "combined_peak_lat": 74.0,
+      "combined_peak_mlt": 11.5,
+      "combined_midnight_mean": 3.972319063905161e-06
+    },
+    "case5_quiet": {
+      "stage1_p": 0.0,
+      "stage2_peak_p": 0.5588104724884033,
+      "combined_peak_p": 0.0,
+      "combined_peak_lat": 50.0,
+      "combined_peak_mlt": 0.0,
+      "combined_midnight_mean": 0.0
+    },
+    "case6_storm": {
+      "stage1_p": 0.07126781344413757,
+      "stage2_peak_p": 0.01876978762447834,
+      "combined_peak_p": 0.0013376817805692554,
+      "combined_peak_lat": 71.0,
+      "combined_peak_mlt": 12.0,
+      "combined_midnight_mean": 2.4460068743792363e-06
+    }
+  },
+  "physics_checks": {
+    "storm_peak_higher_than_quiet": true,
+    "south_Bz_peak_higher_than_north_Bz": false,
+    "strong_driving_above_0.1": false,
+    "quiet_below_strong_driving_in_stage1": true,
+    "south_Bz_lower_lat_than_north_Bz": true,
+    "midnight_low": true
+  },
+  "n_pass": 4,
+  "n_total": 6
+}
