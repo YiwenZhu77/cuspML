@@ -1,4 +1,13 @@
-"""R013 (B-fix-1) — stage 2 renormalized over the dial then combined with stage 1.
+"""R013 (B-fix-1, v2) — stage 2 renormalized as conditional spatial shape over dial.
+
+v2 (post codex round 1):
+- drop MLT=24 endpoint duplicate (sampled at 0 already; same point on dial)
+- use bin-edge convention (cell centers), not inclusive endpoints
+- pole (MLAT=90) handled separately as a single point, not 48 redundant MLT samples
+- area-weight cells by cos((90-MLAT)*pi/180) so high-lat tiny cells don't over-weight
+- renormalized stage 2 explicitly NOT a calibrated probability; it is a spatial
+  shape function. Calibrated quantity is stage1(SW) * shape; sums to stage1(SW)
+  in (cell-area-weighted) integral over the dial.
 
 Stage 2 outputs P((MLAT, MLT) is the cusp | observed, SW) which is a calibrated
 binary classifier, not a density. Renormalize over the polar dial so each
@@ -39,12 +48,20 @@ from r012_case_studies_2stage import (
 OUT_DIR = "/glade/work/yizhu/cuspML/src/kernels/cuspmap_mvp"
 
 
-def combined_renorm(stage1_p, stage2_grid_p):
-    """Renormalize stage 2 over the dial, then multiply by stage 1 scalar."""
-    s2_sum = stage2_grid_p.sum()
-    if s2_sum < 1e-9:
+def combined_renorm(stage1_p, stage2_grid_p, mlat_axis, mlt_axis):
+    """Renormalize stage 2 over the dial with cell-area weighting, then multiply by stage 1 scalar.
+
+    Cell area weight = cos(|MLAT|) since polar dial cells get smaller toward the pole.
+    Sum of returned map (area-weighted) equals stage1_p.
+    """
+    MM, LL = np.meshgrid(mlt_axis, mlat_axis)
+    area_w = np.cos(np.deg2rad(LL))
+    area_w = area_w / area_w.sum()
+    weighted = stage2_grid_p * area_w
+    s2_sum = weighted.sum()
+    if s2_sum < 1e-12:
         return np.zeros_like(stage2_grid_p)
-    return stage1_p * stage2_grid_p / s2_sum
+    return stage1_p * weighted / s2_sum
 
 
 def main():
@@ -58,7 +75,7 @@ def main():
         sw = build_sw_state(c, hemisphere="N")
         s1_p = stage1_scalar(s1_model, s1_iso, s1_feats, sw)
         mlat_axis, mlt_axis, s2_p = stage2_grid(s2, sw, hemisphere="N")
-        combined = combined_renorm(s1_p, s2_p)
+        combined = combined_renorm(s1_p, s2_p, mlat_axis, mlt_axis)
         all_maps[c["name"]] = {"s1": s1_p, "s2": s2_p, "combined": combined,
                                 "mlat": mlat_axis, "mlt": mlt_axis,
                                 "title": c["title"]}

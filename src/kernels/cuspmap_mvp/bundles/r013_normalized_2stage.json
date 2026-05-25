@@ -2,35 +2,35 @@
   "summary": {
     "case1_strong_south_Bz": {
       "s1": 0.09459459781646729,
-      "combined_peak": 0.0027940820436924696,
-      "combined_sum": 0.0945945754647255,
+      "combined_peak": 0.002950977919294416,
+      "combined_sum": 0.09459459781646727,
       "peak_lat": 71.0,
       "peak_mlt": 11.5,
-      "midnight_mean": 5.122300535731483e-06
+      "midnight_mean": 4.677189716977673e-06
     },
     "case2_strong_north_Bz": {
       "s1": 0.017699114978313446,
-      "combined_peak": 0.0008373687160201371,
-      "combined_sum": 0.017699114978313446,
-      "peak_lat": 81.0,
-      "peak_mlt": 11.0,
-      "midnight_mean": 9.557517444136465e-08
+      "combined_peak": 0.0007889304991335995,
+      "combined_sum": 0.01769911497831345,
+      "peak_lat": 80.0,
+      "peak_mlt": 11.5,
+      "midnight_mean": 1.6951560661640837e-07
     },
     "case3_strong_By_pos": {
       "s1": 0.10648148506879807,
-      "combined_peak": 0.004511441569775343,
-      "combined_sum": 0.10648146271705627,
-      "peak_lat": 75.0,
+      "combined_peak": 0.0048002651536718215,
+      "combined_sum": 0.10648148506879807,
+      "peak_lat": 74.0,
       "peak_mlt": 11.5,
-      "midnight_mean": 8.607275958638638e-07
+      "midnight_mean": 9.89972658372602e-07
     },
     "case4_strong_By_neg": {
       "s1": 0.10999999940395355,
-      "combined_peak": 0.005324570462107658,
-      "combined_sum": 0.10999999940395355,
+      "combined_peak": 0.00571721591244352,
+      "combined_sum": 0.10999999940395352,
       "peak_lat": 74.0,
       "peak_mlt": 11.5,
-      "midnight_mean": 1.388489408782334e-06
+      "midnight_mean": 1.5462381947151708e-06
     },
     "case5_quiet": {
       "s1": 0.0,
@@ -42,11 +42,11 @@
     },
     "case6_storm": {
       "s1": 0.07126781344413757,
-      "combined_peak": 0.0023116429802030325,
-      "combined_sum": 0.07126782089471817,
+      "combined_peak": 0.002351087237884351,
+      "combined_sum": 0.07126781344413757,
       "peak_lat": 71.0,
       "peak_mlt": 12.0,
-      "midnight_mean": 4.226935743645299e-06
+      "midnight_mean": 3.72838866981732e-06
     }
   },
   "physics_checks": {

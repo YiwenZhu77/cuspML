@@ -1,0 +1,72 @@
+{
+  "case_studies": {
+    "summary": {
+      "case1_strong_south_Bz": {
+        "s1": 0.09803921729326248,
+        "combined_peak": 0.0030584364449505663,
+        "peak_lat": 71.0,
+        "peak_mlt": 11.5,
+        "midnight_mean": 4.8475074641605125e-06
+      },
+      "case2_strong_north_Bz": {
+        "s1": 0.0381944440305233,
+        "combined_peak": 0.0017025010476542164,
+        "peak_lat": 80.0,
+        "peak_mlt": 11.5,
+        "midnight_mean": 3.658123220931568e-07
+      },
+      "case3_strong_By_pos": {
+        "s1": 0.1745506078004837,
+        "combined_peak": 0.007868872223518817,
+        "peak_lat": 74.0,
+        "peak_mlt": 11.5,
+        "midnight_mean": 1.6228204284824856e-06
+      },
+      "case4_strong_By_neg": {
+        "s1": 0.1745506078004837,
+        "combined_peak": 0.009072213798646131,
+        "peak_lat": 74.0,
+        "peak_mlt": 11.5,
+        "midnight_mean": 2.453607437766543e-06
+      },
+      "case5_quiet": {
+        "s1": 0.0,
+        "combined_peak": 0.0,
+        "peak_lat": 50.0,
+        "peak_mlt": 0.0,
+        "midnight_mean": 0.0
+      },
+      "case6_storm": {
+        "s1": 0.09620991349220276,
+        "combined_peak": 0.0031739138446667493,
+        "peak_lat": 71.0,
+        "peak_mlt": 12.0,
+        "midnight_mean": 5.033239186853995e-06
+      }
+    },
+    "physics_checks": {
+      "storm_peak_higher_than_quiet": true,
+      "south_Bz_peak_higher_than_north_Bz": true,
+      "south_Bz_lat_lower_than_north_Bz": true,
+      "quiet_below_active_in_stage1": true,
+      "strong_above_quiet_by_5x": true,
+      "midnight_low": true
+    },
+    "n_pass": 6,
+    "n_total": 6
+  },
+  "end_to_end": {
+    "n_eval": 500,
+    "median_peak_dist_deg": 3.323664941454033,
+    "p90_peak_dist_deg": 8.297736477443035,
+    "median_stage2_only_peak_dist_deg": 3.1204028210547214,
+    "frac_true_in_top10_cells": 0.404,
+    "frac_true_in_top1pct_cells": 0.592,
+    "mean_logp_combined": -5.650929869009826,
+    "mean_logp_stage2_only": -4.1475916611126005,
+    "mean_logp_uniform": -7.560080463101827,
+    "logp_improvement_over_uniform": 1.9091505940920008,
+    "logp_improvement_stage2_over_uniform": 3.4124888019892268
+  },
+  "elapsed_sec": 23.99370813369751
+}
