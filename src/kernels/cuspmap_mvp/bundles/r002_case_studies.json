@@ -1,0 +1,56 @@
+{
+  "summary": {
+    "case1_strong_south_Bz": {
+      "peak_p": 0.01876978762447834,
+      "peak_lat": 71.0,
+      "peak_mlt": 11.5,
+      "midnight_mean_p": 3.44100444635842e-05,
+      "dayside_mean_p": 0.00333191710524261
+    },
+    "case2_strong_north_Bz": {
+      "peak_p": 0.3440420627593994,
+      "peak_lat": 81.0,
+      "peak_mlt": 11.0,
+      "midnight_mean_p": 3.926810313714668e-05,
+      "dayside_mean_p": 0.026796625927090645
+    },
+    "case3_strong_By_pos": {
+      "peak_p": 0.19718310236930847,
+      "peak_lat": 75.0,
+      "peak_mlt": 11.5,
+      "midnight_mean_p": 3.7620113289449364e-05,
+      "dayside_mean_p": 0.030440010130405426
+    },
+    "case4_strong_By_neg": {
+      "peak_p": 0.1384820193052292,
+      "peak_lat": 74.0,
+      "peak_mlt": 11.5,
+      "midnight_mean_p": 3.61119928129483e-05,
+      "dayside_mean_p": 0.01863105222582817
+    },
+    "case5_quiet": {
+      "peak_p": 0.5588104724884033,
+      "peak_lat": 81.0,
+      "peak_mlt": 12.0,
+      "midnight_mean_p": 3.660378934000619e-05,
+      "dayside_mean_p": 0.028101658448576927
+    },
+    "case6_storm": {
+      "peak_p": 0.01876978762447834,
+      "peak_lat": 71.0,
+      "peak_mlt": 12.0,
+      "midnight_mean_p": 3.432134326430969e-05,
+      "dayside_mean_p": 0.0026729546952992678
+    }
+  },
+  "physics_checks": {
+    "peak_in_dayside_all_cases": true,
+    "south_Bz_lower_lat_than_north_Bz": true,
+    "by_shifts_mlt_in_opposite_directions": false,
+    "quiet_max_p_below_0.6": true,
+    "storm_lowest_peak_lat": true,
+    "midnight_low_all_cases": true
+  },
+  "n_pass": 5,
+  "n_total": 6
+}
