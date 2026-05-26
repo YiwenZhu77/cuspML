@@ -1,0 +1,17 @@
+{
+  "synth_paper1SW": {
+    "median_dist": 2.415360117782263,
+    "p90_dist": 7.973035249994961,
+    "frac_top10": 0.485
+  },
+  "real_paper1SW": {
+    "median_dist": 38.04923928799042,
+    "p90_dist": 44.404846363652524,
+    "frac_top10": 0.055
+  },
+  "real_omniminSW": {
+    "median_dist": 38.09547532034581,
+    "p90_dist": 45.38408644027537,
+    "frac_top10": 0.105
+  }
+}
