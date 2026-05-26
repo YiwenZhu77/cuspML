@@ -1,0 +1,74 @@
+[
+  {
+    "sat": "DMSP-F16",
+    "LTAN_hr": 17.5,
+    "n_min_polar_dayside": 125746,
+    "n_min_in_cusp_lat_band": 42573,
+    "mlt_p5_cusp_band": 5.502681814381631,
+    "mlt_p50_cusp_band": 13.19789679152509,
+    "mlt_p95_cusp_band": 18.743226179765177
+  },
+  {
+    "sat": "DMSP-F17",
+    "LTAN_hr": 17.5,
+    "n_min_polar_dayside": 122162,
+    "n_min_in_cusp_lat_band": 35781,
+    "mlt_p5_cusp_band": 6.018604248364806,
+    "mlt_p50_cusp_band": 13.36975428218993,
+    "mlt_p95_cusp_band": 18.609773382167575
+  },
+  {
+    "sat": "DMSP-F18",
+    "LTAN_hr": 19.8,
+    "n_min_polar_dayside": 121271,
+    "n_min_in_cusp_lat_band": 30983,
+    "mlt_p5_cusp_band": 7.1323153952610125,
+    "mlt_p50_cusp_band": 9.688459419951002,
+    "mlt_p95_cusp_band": 16.872568594770108
+  },
+  {
+    "sat": "POES-N15",
+    "LTAN_hr": 7.5,
+    "n_min_polar_dayside": 147813,
+    "n_min_in_cusp_lat_band": 33639,
+    "mlt_p5_cusp_band": 5.234675858296704,
+    "mlt_p50_cusp_band": 12.204035015782976,
+    "mlt_p95_cusp_band": 17.42196299273897
+  },
+  {
+    "sat": "POES-N18",
+    "LTAN_hr": 14.0,
+    "n_min_polar_dayside": 133259,
+    "n_min_in_cusp_lat_band": 39079,
+    "mlt_p5_cusp_band": 5.356886687458729,
+    "mlt_p50_cusp_band": 12.773427893222735,
+    "mlt_p95_cusp_band": 17.990939357453644
+  },
+  {
+    "sat": "POES-N19",
+    "LTAN_hr": 14.0,
+    "n_min_polar_dayside": 128275,
+    "n_min_in_cusp_lat_band": 40027,
+    "mlt_p5_cusp_band": 5.432225015391746,
+    "mlt_p50_cusp_band": 12.746099064692919,
+    "mlt_p95_cusp_band": 18.507515872465312
+  },
+  {
+    "sat": "MetOp-A",
+    "LTAN_hr": 9.5,
+    "n_min_polar_dayside": 154588,
+    "n_min_in_cusp_lat_band": 30066,
+    "mlt_p5_cusp_band": 7.067325246039388,
+    "mlt_p50_cusp_band": 11.679839610198375,
+    "mlt_p95_cusp_band": 14.188543658832002
+  },
+  {
+    "sat": "MetOp-B",
+    "LTAN_hr": 9.5,
+    "n_min_polar_dayside": 155184,
+    "n_min_in_cusp_lat_band": 30646,
+    "mlt_p5_cusp_band": 7.0050192877917965,
+    "mlt_p50_cusp_band": 11.69410393576161,
+    "mlt_p95_cusp_band": 14.1824093086321
+  }
+]
