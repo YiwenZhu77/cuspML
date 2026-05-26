@@ -34,7 +34,7 @@ Stage 1 学时间维度上 SW 何时产生可探测 cusp;stage 2 学给定 SW �
 ### 2.2 数据流
 
 **Stage 2 训练数据 (空间分类)**
-- 48,056 DMSP F06-F18 cusp crossings (1987-2014, Anderson 2024 criterion + AE<100 filter, 39,668 after dropna)
+- 48,056 DMSP F06-F18 cusp crossings (1987-2014, Anderson 2024 criterion).  注意:本数据集**没有 AE<100 filter**(AE 实际分布 min 5 / median 187 / max 2421,70% > 100 nT)。Anderson 2024 原 paper 在他们的数据里加了 AE<100 filter,但我们继承的 cusp database 没加。后续 dropna 后 39,668 crossings 进训练
 - 每 crossing 扩展为 5 真实 positive cells (在 `[eq_lat, pole_lat] × [eq_mlt, pole_mlt]` 内均匀采样) + 50 合成 negative cells (5 near-boundary + 5 dial-random per positive,同 SW state)
 - 总扩展数据 ~2.18M rows
 - 特征 76 维:74 SW (Paper 1 同套,含 15/30/60 分钟 mean/std/Δ history) + 2 维极坐标 `(x_polar, y_polar) = (90 - |MLAT|) · (cos, sin)(2π MLT / 24)`
@@ -44,7 +44,7 @@ Stage 1 学时间维度上 SW 何时产生可探测 cusp;stage 2 学给定 SW �
 - NASA OMNI2 hourly 1987-2014, 197,775 hours after dropna
 - Opportunity 限制 (R015): 只保留 ±24 h 内有 DMSP crossing 的 hours (147,521 hours, 16.2% positive rate)
 - 该限制排除了 DMSP 没在运行 / 在夜侧的小时,把 stage 1 negatives 限定为"DMSP 在场但 SW 状态没产生 cusp"
-- 特征 13 维 SW (AE 故意排除,因 48k positives 已被 AE<100 滤,留 AE 会教模型学 filter 不是物理)
+- 特征 13 维 SW (AE 排除。原 R015 设计 rationale 假设 48k 已被 AE<100 filter — 后来证实**没 filter**。但 AE 仍排除以保持 stage 1 不依赖单一 geomagnetic activity proxy,而是从底层 SW 学 occurrence pattern。这一点 stage 1 单独 SHAP 验证过 AE 排除前后 ranking 一致)
 
 ### 2.3 模型与推理
 
@@ -72,7 +72,13 @@ Stage 1 学时间维度上 SW 何时产生可探测 cusp;stage 2 学给定 SW �
 - Stage 2 AUC: **0.9234** (drop 0.005 vs random,远低于 0.05 gate)
 - Brier 0.0579
 
-### 3.3 5-fold 时间 cross-validation (R030)
+### 3.3 5-block 时间 cross-validation (R030)
+
+> **协议限制**(诚实声明):本节叫 5-block temporal CV,**不是严格 LOYO**:
+> - 只 retrain stage 2,stage 1 (R015) 在所有 folds 间共享
+> - 每 fold test 端到端 inference 仅采 500 真实 crossings(避免 ×27,000 推理时间)
+> - 因此 fold-to-fold 方差被压缩:stage 1 不变 + 子采样统计 → 真实 LOYO 方差可能更大
+> - 真严格 LOYO (23 折 + stage 1 也重训 + 全 test 推理) 约 100h wall,本章不做
 
 5 折每折 train 所有年除该 5 年窗口外,test 在该窗口内 (n=500 sample per fold for end-to-end inference cost):
 
@@ -87,10 +93,10 @@ Stage 1 学时间维度上 SW 何时产生可探测 cusp;stage 2 学给定 SW �
 
 **观察**:
 - Best fold = 2010-2014 (3.28°),worst = 1990-1994 (4.80°)。Train-on-recent-test-on-old 退化更多,原因 (a) 早期 DMSP F09-F12 era MLT 平面跟后期 F16-F18 不完全一致 (b) solar cycle 22 vs 23-24 SW 统计分布有差
-- 跨 fold std 0.52° 表明模型时间稳定性合理 (~14% 相对 mean)
-- IID random-split (R028) 是 3.31°,LOYO mean 3.82°,泛化代价 ~15%。可接受
+- 跨 fold std 0.52° 是**协议压缩下的方差** (stage 1 不变 + 500 子采样),不能直接当 cross-solar-cycle robustness 证据。真严格 LOYO 方差大概率更大
+- IID random-split (R028) 3.31°,5-block CV mean 3.82°,泛化代价 ~15%
 
-LOYO 是 thesis chapter 最严格的验证,数字说明模型不靠 within-year leak 取胜。
+这一节给的是"中等强度时间泛化证据",不是 thesis chapter 最强 validation。最强是 R009 temporal split (drop 0.005) + R028 全 7933 test。
 
 ### 3.4 端到端误差 (R028, 全 7933 holdout crossings)
 
@@ -158,9 +164,9 @@ Top 15 features by mean(|SHAP|) on stage 2 (5000 background samples):
 | 14 | `sw_pdyn` | 0.05 | 动压 |
 | 15 | **`by_hemi`** | 0.04 | **IMF By × hemisphere sign — Cowley 1981 By 不对称** |
 
-空间特征 (x, y) 占主导是正常的:给定 SW state,cusp 位置约束在表盘上一个相对窄的区域,model 必须先用空间找到大致位置。但 SW 特征里 60 分钟 Newell CF 第一、IMF Bz 15/30/60 分钟 mean 全在前 11,这跟 Paper 1 的发现完全一致:**磁层 reconfiguration 时间尺度 ~1 小时,过去 60 分钟的 reconnection 率比瞬时值预测力强**。
+空间特征 (x, y) 占主导是正常的:给定 SW state,cusp 位置约束在表盘上一个相对窄的区域,model 必须先用空间找到大致位置。但 SW 特征里 60 分钟 Newell CF 第一、IMF Bz 15/30/60 分钟 mean 全在前 11,这跟 Paper 1 的发现一致:**磁层 reconfiguration 时间尺度 ~1 小时,过去 60 分钟的 reconnection 率比瞬时值预测力强**。
 
-Dipole tilt 排第 5 — Newell 1989 给出每 1° tilt 推 cusp equatorward ~0.06°,模型从数据自动学到这个。`by_hemi` (IMF By 按半球翻号) 排第 15,反映 Cowley 1981 描述的 By 在两半球对 reconnection geometry 的对称破坏。
+**注意 framing**:模型不是从原始 IMF/SW 自己"发现"了 Newell coupling function 的公式 — 我们已经把 `newell_cf`、`vBs`、`by_hemi` 等 engineered driver 当 features 喂进去 (Paper 1 同套 feature engineering)。SHAP 真正说明的是:**给定一组候选 features,模型优先 upweight 物理上预期的驱动量**。Dipole tilt 排第 5、by_hemi 排第 15,反映 Newell 1989 (tilt 控制 cusp equatorward shift) 和 Cowley 1981 (By 在两半球对 reconnection geometry 的对称破坏) — 模型 ranking 跟这些已知物理一致 (consistent with),不是从零 recovery。
 
 ### 4.2 60 分钟时间尺度的物理
 
@@ -168,7 +174,9 @@ Dipole tilt 排第 5 — Newell 1989 给出每 1° tilt 推 cusp equatorward ~0.
 
 ### 4.3 Dipole tilt 和半球
 
-`dipole_tilt` 第 5 重要。物理: 当磁偶极倾向太阳 (summer hemisphere),subsolar reconnection point 移向高纬,cusp 跟着 contract poleward;倾离太阳时 expand equatorward。Newell 1989 给斜率 ~-0.06°/°。本模型在 partial dependence (R029 figure thesis_pdp_top5.png) 上 dipole tilt 这条线斜率 ≈ -0.05°/°,跟 Newell 1989 经验值在测量误差内一致。
+`dipole_tilt` 第 5 重要。物理: 当磁偶极倾向太阳 (summer hemisphere),subsolar reconnection point 移向高纬,cusp 跟着 contract poleward;倾离太阳时 expand equatorward。Newell 1989 给斜率 ~-0.06°/°。
+
+> **PDP 局限提醒**: R029 用的 "PDP" 是单 feature 在中位数 baseline 周围扫,不是 sklearn 标准 robust PDP (该法对所有 row 求 expectation 后再 vary 一个 feature)。单点 sweep 容易受 baseline 选择影响。所以"tilt PDP 斜率 ≈ -0.05°/°" 这种 quantitative match 当**定性 sanity check**,不当严格物理验证。要严格匹配 Newell 1989 数值得跑真 PDP 或 ICE plot,留 future work。
 
 ### 4.4 IMF By 的不对称
 
@@ -208,11 +216,11 @@ S hemisphere training 数据只有 N 的 10% (DMSP descending 半 pass 在 S 半
 ## 6. 局限和 future work
 
 1. **零支持区无 ground truth 校准**: MLT 0-4, MLT 20-24, |MLAT| < 65°, |MLAT| > 86° 这些 cells 的预测 P 是模型先验外推,不应作业务决策依据。Coverage mask figure (thesis_coverage_vs_error.png) 显式标记
-2. **Stage 1 target 是观测 proxy 不是物理存在**: stage 1 训"DMSP-detectable cusp crossing 在 hour 内发生" 不是"物理 cusp 存在"。AE<100 filter 继承 Paper 1,storm-time 系统性 underestimate. Future: 放松 filter + 测量校准
+2. **Stage 1 target 是观测 proxy 不是物理存在**: stage 1 训"DMSP-detectable cusp crossing 在 hour 内发生" 不是"物理 cusp 存在"。Future: 加专门的 storm-time augmentation + 与 SuperDARN PCB / Polar UVI cusp imaging 做 cross-validation
 3. **Opportunity proxy 是 ±24h heuristic 不是 TLE 真 orbit availability**: R017 window sweep 在 ±6/12/24/48h 显示 combined logp 稳定 (+1.95 to +2.09 nats 范围 0.14),proxy 在敏感性上是 defensible。Future: SGP4-based 真 orbit availability mask
 4. **没用 multi-instrument**: SuperDARN PCB、AMPERE FAC、Polar UVI cusp imaging 可以在零支持区给约束 (它们覆盖全极区)。需要 Globus / JHU/APL 账号 + 几周整合工作。本章不做,留 future paper / 后续 chapter
 5. **真负样本路径已 explored 但 not adopted**: R020-R025 pilot 在 F10 1993-94 测试用 real 1Hz spectra negatives 替代合成 negatives。结论:real-only 严重退化 (median 38° vs 合成 2.4°),hybrid (real-near + synth-far) 接近但没赢 (5.6°)。原因:DMSP 实际覆盖只占表盘 ~12%,real negatives 学不到 dial 远端先验。合成 dial-random negatives 在当前数据量级仍是最优设计
 
 ## 7. 章节总结
 
-二维极隙概率图谱用两阶段 XGBoost (occurrence × spatial) 把 Paper 1 的一维边界点估计扩展到全极区表盘概率场。在 DMSP 数据支持区域 (MLT 5-19, |MLAT| 70-83) median 2D 误差 3.31°、true cell top 1% 命中 59.2%,通过 SHAP 还原已知物理 (60 分钟 Newell CF dominant + dipole tilt + by_hemi)。覆盖密度和误差强负相关 (Spearman ρ=-0.58),失效集中在 storm-time 低纬和数据稀疏的高纬。零支持区的概率值是模型先验外推,paper 阶段会显式 mask。
+二维 DMSP-可探测 cusp 概率图谱用两阶段 XGBoost (occurrence × spatial) 把 Paper 1 的一维边界点估计扩展到全极区表盘概率场。在 DMSP 数据支持区域 (MLT 5-19, |MLAT| 70-83) median 2D 误差 3.31°、true cell top 1% 命中 59.2%。SHAP 显示模型 ranking 跟已知物理一致 (consistent with),60 分钟 Newell CF + dipole tilt + by_hemi 都在 top 15,但不能宣称从原始 SW 自己 "discovered" 这些 — 这些是 engineered features 喂进去的。覆盖密度和误差强负相关 (Spearman ρ=-0.58, p=1.1e-17),失效集中在 storm-time 低纬和数据稀疏的高纬。零支持区 (MLT 0-4, 20-24 / |MLAT|<65, >86) 的概率值是模型先验外推,thesis 显式 mask。
