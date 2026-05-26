@@ -219,7 +219,7 @@ S hemisphere training 数据只有 N 的 10% (DMSP descending 半 pass 在 S 半
 2. **Stage 1 target 是观测 proxy 不是物理存在**: stage 1 训"DMSP-detectable cusp crossing 在 hour 内发生" 不是"物理 cusp 存在"。Future: 加专门的 storm-time augmentation + 与 SuperDARN PCB / Polar UVI cusp imaging 做 cross-validation
 3. **Opportunity proxy 是 ±24h heuristic 不是 TLE 真 orbit availability**: R017 window sweep 在 ±6/12/24/48h 显示 combined logp 稳定 (+1.95 to +2.09 nats 范围 0.14),proxy 在敏感性上是 defensible。Future: SGP4-based 真 orbit availability mask
 4. **没用 multi-instrument**: SuperDARN PCB、AMPERE FAC、Polar UVI cusp imaging 可以在零支持区给约束 (它们覆盖全极区)。需要 Globus / JHU/APL 账号 + 几周整合工作。本章不做,留 future paper / 后续 chapter
-5. **真负样本路径已 explored 但 not adopted**: R020-R025 pilot 在 F10 1993-94 测试用 real 1Hz spectra negatives 替代合成 negatives。结论:real-only 严重退化 (median 38° vs 合成 2.4°),hybrid (real-near + synth-far) 接近但没赢 (5.6°)。原因:DMSP 实际覆盖只占表盘 ~12%,real negatives 学不到 dial 远端先验。合成 dial-random negatives 在当前数据量级仍是最优设计
+5. **真负样本路径已 explored 但 not adopted**: R020-R025 pilot 在 F10 1993-94 测试用 real 1Hz spectra negatives 替代合成 negatives。结论:real-only 严重退化 (median 38° vs 合成 2.4°),hybrid (real-near + synth-far) 接近但没赢 (5.6°)。原因 (R031 verification): 真 DMSP 非 cusp 1Hz spectra 覆盖 dayside 表盘 ~44% (即 837/1920 格,MLT 5-19 有数据),但 nightside (MLT 0-4 / 20-24) 完全没覆盖 (sun-sync 在 cusp 纬度到不了夜侧)。合成 dial-random negatives 补完 nightside + 极高/低纬,把覆盖率推到 100%。Real-only 模型在 nightside 没 anchor 必然乱外推 — 这是 R023 失败的物理根因。Hybrid (real near + synth far) 思路正确但 pilot scale 没胜过纯 synth,合成 negatives 在当前数据量级仍是最优 fit-for-purpose 设计
 
 ## 7. 章节总结
 
