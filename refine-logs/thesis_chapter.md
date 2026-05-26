@@ -23,7 +23,7 @@
 
 ### 2.1 两阶段分解
 
-单阶段二分类器把 (MLT, MLAT) 当 feature 给 stage 2 直接预测 P(cusp at cell | SW) 在 case study 出现 magnitude 反向:风暴时 peak P=0.02、quiet 时 peak P=0.56。诊断为训练集每 crossing 固定 1:10 正负比抹平了 P(cusp | SW) 的全局信号。
+单阶段二分类器把 (MLT, MLAT) 当 feature 给 stage 2 直接预测 P(DMSP-detect cusp at (MLAT, MLT) in hour | SW) 在 case study 出现 magnitude 反向:风暴时 peak P=0.02、quiet 时 peak P=0.56。诊断为训练集每 crossing 固定 1:10 正负比抹平了 P(any DMSP cusp obs | SW) 的全局信号。
 
 两阶段拆分修复:
 
@@ -44,7 +44,7 @@ Stage 1 学时间维度上 SW 何时产生可探测 cusp;stage 2 学给定 SW �
 - NASA OMNI2 hourly 1987-2014, 197,775 hours after dropna
 - Opportunity 限制 (R015): 只保留 ±24 h 内有 DMSP crossing 的 hours (147,521 hours, 16.2% positive rate)
 - 该限制排除了 DMSP 没在运行 / 在夜侧的小时,把 stage 1 negatives 限定为"DMSP 在场但 SW 状态没产生 cusp"
-- 特征 13 维 SW (AE 排除。原 R015 设计 rationale 假设 48k 已被 AE<100 filter — 后来证实**没 filter**。但 AE 仍排除以保持 stage 1 不依赖单一 geomagnetic activity proxy,而是从底层 SW 学 occurrence pattern。这一点 stage 1 单独 SHAP 验证过 AE 排除前后 ranking 一致)
+- 特征 13 维 SW (AE 排除。原 R015 设计 rationale 假设 48k 已被 AE<100 filter — 后来证实**没 filter**。当前选择保留 AE 排除以保持 stage 1 不依赖单一 geomagnetic activity proxy,而是从底层 SW 学 occurrence pattern。 注:AE-include 对照实验未跑,这是设计选择,不是 ablation 验证)
 
 ### 2.3 模型与推理
 
