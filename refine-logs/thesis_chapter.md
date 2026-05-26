@@ -6,7 +6,7 @@
 
 ## 1. 章节定位与范围
 
-本章在博士论文中接续 Paper 1 (Zhu et al. 2026 JGR:SP) 提交版的一维 cusp 边界回归。Paper 1 给出沿 DMSP 单 pass 的 equatorward MLAT 点估计 (MAE 1.11° on temporal holdout, 1.26° LOYO),误差跟 Newell 2006 线性 baseline 比降 40%。本章把同一份 DMSP 数据扩展到二维 cusp 概率图谱 `P(cusp | MLAT, MLT, SW)`,目标是给 operational space weather 一个全极区的实时 cusp 分布预报。
+本章在博士论文中接续 Paper 1 (Zhu et al. 2026 JGR:SP) 提交版的一维 cusp 边界回归。Paper 1 给出沿 DMSP 单 pass 的 equatorward MLAT 点估计 (MAE 1.11° on temporal holdout, 1.26° LOYO),误差跟 Newell 2006 线性 baseline 比降 40%。本章把同一份 DMSP 数据扩展到二维 **DMSP-可探测 cusp 概率图谱** `P(DMSP-detect cusp at (MLAT, MLT) in hour | SW)`,目标是给 operational space weather 一个全极区的实时 cusp 分布预报。注意 target 是 DMSP 观测意义上的 cusp,不是物理 cusp 本体 — 这点全章一贯。
 
 本章不是论文,是博士论文里的一个研究 chapter。范围明确:
 - 用同一份 48,056 DMSP 1987-2014 crossings
@@ -27,7 +27,7 @@
 
 两阶段拆分修复:
 
-$$P(\text{cusp at (MLAT, MLT)} \mid \text{SW}) = \underbrace{P(\text{any cusp obs in hour} \mid \text{SW})}_{\text{stage 1}} \times \underbrace{P((\text{MLAT, MLT}) \mid \text{cusp obs, SW})}_{\text{stage 2}}$$
+$$P(\text{DMSP-detect cusp at (MLAT, MLT) in hour} \mid \text{SW}) = \underbrace{P(\text{any DMSP cusp obs in hour} \mid \text{SW})}_{\text{stage 1}} \times \underbrace{P((\text{MLAT, MLT}) \mid \text{cusp obs, SW})}_{\text{stage 2}}$$
 
 Stage 1 学时间维度上 SW 何时产生可探测 cusp;stage 2 学给定 SW 下 cusp 在极区表盘 (polar dial,简称表盘) 上的分布形状。两个分别在合适数据上训练,推理时相乘。
 
@@ -170,7 +170,7 @@ Top 15 features by mean(|SHAP|) on stage 2 (5000 background samples):
 
 ### 4.2 60 分钟时间尺度的物理
 
-为什么 60 分钟 Newell CF mean 主导而不是瞬时 Newell CF?Newell 2006 的 binned correlation 在 60-min averaging 时最优。物理解释:磁层 dayside reconnection 不是瞬时响应 — IMF 转向南后,需要约 30-60 分钟 reconfigure dayside magnetopause 拓扑、把新的 open field line 拖到极区。Cusp 位置反映的是已经累积的 open flux,不是当前瞬时输入。模型独立学到 60-min 时间尺度,等于在数据里 reproduce 了 Cowley & Lockwood 1992 的 expansion-contraction 理论时间尺度。
+为什么 60 分钟 Newell CF mean 主导而不是瞬时 Newell CF?Newell 2006 的 binned correlation 在 60-min averaging 时最优。物理解释:磁层 dayside reconnection 不是瞬时响应 — IMF 转向南后,需要约 30-60 分钟 reconfigure dayside magnetopause 拓扑、把新的 open field line 拖到极区。Cusp 位置反映的是已经累积的 open flux,不是当前瞬时输入。在我们给定的 15/30/60 分钟 history features 中,模型**优先选择** 60-min mean (rank 3, mean(|SHAP|) 0.28) 而非瞬时 Newell CF (rank 10, 0.06) 或更短窗口,这一选择跟 Cowley & Lockwood 1992 expansion-contraction 时间尺度一致。
 
 ### 4.3 Dipole tilt 和半球
 
@@ -202,12 +202,12 @@ R026 + R027 分析回答了一个关键问题:DMSP 飞过这些 cells 没有?答
 AE ≥ 500 时 median peak dist 4.10° (vs quiet 2.90°,+41%)。诊断:
 1. 风暴时 cusp 向低纬推 (Bz 南向强,reconnection 强,oval expand)。但训练数据里 |MLAT| 65-75° 只有 1817 个 crossings (vs 75-83° 的 5985 个),所以低纬 cusp 训练支持稀疏
 2. 风暴时 SW 1 小时内可能从 Bz=-5 跳到 Bz=+10 (R018/R019 在 2011-08-05 风暴 06:00 UT 那个 Bz +19.7 尖峰说明)。stage 2 的 60-min history features 假设过去 60 分钟连续平稳,在 IMF 快速变化时这个假设破
-3. Anderson criterion 本身在风暴时 AE > 100 会被滤掉 (Paper 1 follow-up Anderson 2024 标 AE<100 才标 cusp)。所以训练数据系统性 underrepresent storm-time cusp signature
+3. 风暴时 dayside reconnection 强度可能超出训练数据 SW 分布的 quasi-stationary 假设;stage 2 history features (60 分钟 mean) 在 IMF 快速变化时 mean 平滑掉关键瞬时,模型 effective input 偏 quiet-state
 
 可改进路径(留 future work):
 - 加 instantaneous IMF derivative features 让模型识别 SW 突变
-- 放松 AE filter,加 AE 作为 stage 1 feature (但要小心 leakage)
-- 直接训独立 "storm-time cusp" 模型用 AE > 300 的子集
+- 单独训 "storm-time cusp" 模型用 AE > 300 的 storm-time 子集 (现有数据已足,见 section 3.5 AE level n=2660 for AE>=300)
+- 在 stage 2 inference 时对 storm-time test sample 用 attention-style reweighting 强调最近 15 分钟 SW 而不是 60 分钟 mean
 
 ### 5.4 半球不对称
 
