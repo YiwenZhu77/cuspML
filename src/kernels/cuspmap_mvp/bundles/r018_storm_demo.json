@@ -1,0 +1,66 @@
+{
+  "event": "2011-08-05",
+  "frames": [
+    {
+      "frame_t": "2011-08-05 00:00:00",
+      "Bz": -4.6,
+      "By": -3.1,
+      "V": 417.0,
+      "stage1_P": 0.3048780560493469,
+      "combined_peak": 0.013168946071231409,
+      "n_crossings_in_window": 12,
+      "median_peak_dist_deg": 2.8820710472761384
+    },
+    {
+      "frame_t": "2011-08-05 08:00:00",
+      "Bz": 1.1,
+      "By": 1.5,
+      "V": 422.0,
+      "stage1_P": 0.055621303617954254,
+      "combined_peak": 0.002398472565831109,
+      "n_crossings_in_window": 1,
+      "median_peak_dist_deg": 5.396299986969936
+    },
+    {
+      "frame_t": "2011-08-05 16:00:00",
+      "Bz": 0.0,
+      "By": -2.5,
+      "V": 392.0,
+      "stage1_P": 0.055621303617954254,
+      "combined_peak": 0.0026404219506185045,
+      "n_crossings_in_window": 1,
+      "median_peak_dist_deg": 5.939060497134994
+    },
+    {
+      "frame_t": "2011-08-06 00:00:00",
+      "Bz": -3.6,
+      "By": 5.5,
+      "V": 579.0,
+      "stage1_P": 0.28246012330055237,
+      "combined_peak": 0.010496348904766086,
+      "n_crossings_in_window": 10,
+      "median_peak_dist_deg": 8.622114881801156
+    },
+    {
+      "frame_t": "2011-08-06 08:00:00",
+      "Bz": 4.0,
+      "By": -4.3,
+      "V": 520.0,
+      "stage1_P": 0.3271889388561249,
+      "combined_peak": 0.009864779666865131,
+      "n_crossings_in_window": 11,
+      "median_peak_dist_deg": 4.794336670495577
+    },
+    {
+      "frame_t": "2011-08-06 16:00:00",
+      "Bz": 3.8,
+      "By": 0.9,
+      "V": 521.0,
+      "stage1_P": 0.0,
+      "combined_peak": 0.0,
+      "n_crossings_in_window": 0,
+      "median_peak_dist_deg": null
+    }
+  ],
+  "n_event_crossings_total": 36
+}
