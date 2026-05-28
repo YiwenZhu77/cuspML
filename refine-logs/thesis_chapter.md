@@ -191,6 +191,27 @@ By > 0 在北半球把 dayside reconnection point 推向晨侧 (MLT < 12),南半
 - **极少支持区**: |MLAT| 65-70° 和 |MLAT| 83-86° — 训练样本零星,模型预测可信度低 (per-MLAT 83-90 bin 4.86° error)
 - **零支持区**: MLT 0-4, MLT 20-24, |MLAT| 50-65°, |MLAT| > 86° — 训练数据完全为 0。模型在这些 cells 输出由两个先验决定: stage 2 训练时合成 negatives 暗示"非主表盘区都是 0",stage 1 SW signal 通过 occurrence rate 缩放整体幅度
 
+### 5.1b DMSP 覆盖 vs 独立 instrument 文献核查
+
+详细文献核查见 `refine-logs/lit_cusp_coverage_verification.md`。要点:
+
+**DMSP 1-99% 覆盖**: MLT [8.7, 15.1] × MLAT [69.1°, 83.6°]
+
+**独立 instrument 观测一致性** (Crossref 验证 DOI):
+- **IMAGE/FUV (Frey 2002, DOI 10.1029/2001JA900161)**: typical cusp 70-78° MLAT, 09-14 MLT — 完全在 DMSP 范围内
+- **Cluster (Pitout & Bogdanova 2021, DOI 10.1029/2021JA029582)**: 典型 75-80° MLAT, 10-14 MLT — 同上
+- **Polar UVI / shock aurora**: cusp 1200-1600 MLT, > 80° MLAT — 同上
+
+**DMSP 漏的真实情况**:
+- **Frey et al. 2003 (DOI 10.1029/2003JA009861)**: extreme storm (Bz 强南向 + 高 Pdyn) 下,IMAGE/FUV 观测到 cusp 质子极光 footprint **下降到 < 60° MLAT**,远低于 DMSP 1-99% 下限 69.1°
+- **Bogdanova 2007 (DOI 10.1007/s11207-007-0417-1)**: 一个 Cluster extreme SW 案例下 cusp 到 68° MLAT,临界 DMSP 下限
+
+**文献无报告**:
+- Nightside MLT 18-06 cusp: 物理上不可能 (cusp 是 dayside reconnection 产物)
+- MLAT > 86° cusp: polar cap interior 不在 cusp 上
+
+**结论**: DMSP 覆盖在 95-99% 的 cusp 事件下完整,但漏 super storm 极低纬 cusp (MLAT < 69°)。这跟 3.5 节 per-AE 误差分析一致 (AE ≥ 500 时 median 误差 4.10° vs quiet 2.90°,部分原因就是 storm cusp 跑到 DMSP 训练支持稀疏的低纬)。
+
 ### 5.2 为什么零支持区是 selection bias 不是 orbit bias
 
 R026 + R027 分析回答了一个关键问题:DMSP 飞过这些 cells 没有?答:**飞过了,只是 Anderson cusp criterion 不触发**。R027 用 SGP4 模拟 DMSP F16/F17 + POES NOAA-15/18/19 + MetOp-A/B 一年轨道,在 |lat| 75-81 上 MLT 覆盖 5-19。所有 sun-synchronous 极轨卫星都到不了 MLT 0-4 / 20-24 的 cusp 纬度带,因为 cusp 纬度带本来就只在 dayside 存在 (cusp 物理上就是 dayside reconnection 产物)。
