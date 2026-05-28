@@ -1,0 +1,126 @@
+{
+  "n_crossings": 48056,
+  "observed_lat_p1_p50_p99": [
+    69.1,
+    76.57621036288711,
+    83.5713065099403
+  ],
+  "observed_mlt_p1_p50_p99": [
+    8.742706466137014,
+    11.719629052925736,
+    15.085789086004825
+  ],
+  "theory_lat_p1_p50_p99": [
+    72.34755243391415,
+    75.35285825520018,
+    79.642
+  ],
+  "theory_mlt_p1_p50_p99": [
+    10.51255000114441,
+    11.990999999642373,
+    13.44700002670288
+  ],
+  "frac_theory_outside_obs_lat": 2.080905610121525e-05,
+  "frac_theory_outside_obs_mlt": 0.0,
+  "sw_corner_cases": [
+    {
+      "label": "strong south Bz storm",
+      "imf_bz": -25,
+      "imf_by": 0,
+      "sw_v": 800,
+      "newell_cf": 30000,
+      "dipole_tilt": 0,
+      "by_hemi": 0,
+      "lat": 72.00987693361667,
+      "mlt": 12.0
+    },
+    {
+      "label": "strong south Bz quiet",
+      "imf_bz": -10,
+      "imf_by": 0,
+      "sw_v": 400,
+      "newell_cf": 8000,
+      "dipole_tilt": 0,
+      "by_hemi": 0,
+      "lat": 74.32257004974849,
+      "mlt": 12.0
+    },
+    {
+      "label": "strong north Bz",
+      "imf_bz": 15,
+      "imf_by": 0,
+      "sw_v": 400,
+      "newell_cf": 200,
+      "dipole_tilt": 0,
+      "by_hemi": 0,
+      "lat": 77.2785120725323,
+      "mlt": 12.0
+    },
+    {
+      "label": "strong By+ N hemi",
+      "imf_bz": -5,
+      "imf_by": 12,
+      "sw_v": 500,
+      "newell_cf": 5000,
+      "dipole_tilt": 0,
+      "by_hemi": 12,
+      "lat": 74.92834763307155,
+      "mlt": 10.8
+    },
+    {
+      "label": "strong By- N hemi",
+      "imf_bz": -5,
+      "imf_by": -12,
+      "sw_v": 500,
+      "newell_cf": 5000,
+      "dipole_tilt": 0,
+      "by_hemi": -12,
+      "lat": 74.92834763307155,
+      "mlt": 13.2
+    },
+    {
+      "label": "strong By+ S hemi",
+      "imf_bz": -5,
+      "imf_by": 12,
+      "sw_v": 500,
+      "newell_cf": 5000,
+      "dipole_tilt": 0,
+      "by_hemi": -12,
+      "lat": 74.92834763307155,
+      "mlt": 13.2
+    },
+    {
+      "label": "summer tilt",
+      "imf_bz": -3,
+      "imf_by": 0,
+      "sw_v": 400,
+      "newell_cf": 3000,
+      "dipole_tilt": 34,
+      "by_hemi": 0,
+      "lat": 73.78755172463023,
+      "mlt": 12.0
+    },
+    {
+      "label": "winter tilt",
+      "imf_bz": -3,
+      "imf_by": 0,
+      "sw_v": 400,
+      "newell_cf": 3000,
+      "dipole_tilt": -34,
+      "by_hemi": 0,
+      "lat": 77.18755172463024,
+      "mlt": 12.0
+    },
+    {
+      "label": "extreme storm",
+      "imf_bz": -35,
+      "imf_by": 0,
+      "sw_v": 1000,
+      "newell_cf": 60000,
+      "dipole_tilt": 0,
+      "by_hemi": 0,
+      "lat": 70.32295733225537,
+      "mlt": 12.0
+    }
+  ]
+}
