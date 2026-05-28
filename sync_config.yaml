@@ -1,0 +1,60 @@
+# research-project-kit per-project config. Lives at the project root.
+# Kit scripts find it by walking up from CWD (or via RESEARCH_KIT_ROOT env).
+# Paths are relative to the project root unless absolute. Anything omitted falls
+# back to kit defaults (see scripts/kit_config.py DEFAULTS).
+
+project:
+  name: cuspML            # short id, used in Drive titles / TG messages
+
+slides:
+  main_tex: slides/main.tex
+  main_pdf: slides/main.pdf
+  priors_md: .claude/rules/priors.md
+  priors_section_tex: slides/priors_section.tex
+  # H1 heading text (as it appears in the PDF outline) that marks the start of the
+  # priors appendix. Deck content is everything before it. Leave "" if no appendix.
+  priors_appendix_marker: "cuspML Project Priors"
+  overflow_baseline: slides/.overflow_baseline.txt
+
+# PDF sinks: scp the compiled main_pdf to each enabled target via tailscale nc proxy.
+# sioyek (Mac) / Sumatra/sioyek (Win) auto-reload on mtime change.
+sinks:
+  mac:
+    host: yiwen@100.68.84.57
+    dst: ~/work/cuspml/cuspml_slides.pdf
+    key: ~/.ssh/id_ed25519
+    enabled: true
+  win:
+    host: user@100.x.x.x
+    dst: sioyek-sync/cuspml_slides.pdf
+    key: ~/.ssh/id_ed25519
+    enabled: false
+
+# Derecho userspace tailscaled cannot do raw TCP to peers; scp goes through nc proxy.
+tailscale_nc: "/glade/u/home/yizhu/bin/tailscale --socket=/tmp/tailscale.sock nc %h %p"
+
+# Optional Google Drive push (stable per-name fileId). Disabled by default because
+# GDrive's PDF viewer ignores #page=N deep-links; Mac sioyek is preferred.
+drive:
+  enabled: false
+  title_prefix: cuspML
+
+# Literature pipeline (only if the project has a lit corpus).
+lit:
+  bib: paper-agent/cuspML.bib
+  raw: raw/lit
+  docs_lit: docs/lit
+  notes: docs/literature.md
+  rules_dir: .claude/rules
+
+# Code-map source layout.
+code:
+  lib_dir: src/lib
+  scripts_dir: src/scripts
+  cells_md: src/cells.md
+  code_map: .claude/rules/code-map.md
+
+docs:
+  dir: docs
+  rules_dir: .claude/rules
+  index: .claude/rules/docs_index.md

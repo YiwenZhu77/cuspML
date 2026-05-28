@@ -1,0 +1,8 @@
+# REPL source registry (kit / repl.md convention). One entry per external data
+# source a kernel can load. Kernel id = one source combo (see CLAUDE.md).
+_root: /glade/work/yizhu/cuspML/output
+
+# example-source:
+#   format: pickle          # pickle | pickle_glob | h5part | h5part_glob | gamera_vol
+#   path: subdir/file.pkl   # relative to _root
+#   tags: [tag1, tag2]
