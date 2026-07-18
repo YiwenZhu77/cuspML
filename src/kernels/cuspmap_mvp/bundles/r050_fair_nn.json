@@ -1,0 +1,62 @@
+{
+ "n_rows": 39267,
+ "random": {
+  "xgb": 0.9041125778315571,
+  "sklearn_mlp": {
+   "MAE": 1.0907968282699585,
+   "params": {
+    "activation": "tanh",
+    "alpha": 0.04202116526335311,
+    "batch_size": 256,
+    "hidden_layer_sizes": [
+     512,
+     256,
+     128,
+     64
+    ],
+    "learning_rate_init": 0.0003280071082578536
+   }
+  },
+  "torch_mlp": {
+   "MAE": 1.058341145515442,
+   "config": {
+    "depth": 4,
+    "width": 512,
+    "drop": 0.1,
+    "wd": 0.0001,
+    "lr": 0.001
+   }
+  },
+  "n_sklearn": 80,
+  "n_torch": 36
+ },
+ "temporal": {
+  "xgb": 1.0736384904853775,
+  "sklearn_mlp": {
+   "MAE": 1.1535643339157104,
+   "params": {
+    "activation": "tanh",
+    "alpha": 1.513298490063033e-05,
+    "batch_size": 256,
+    "hidden_layer_sizes": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate_init": 0.00012046674587990327
+   }
+  },
+  "torch_mlp": {
+   "MAE": 1.1084692478179932,
+   "config": {
+    "depth": 3,
+    "width": 512,
+    "drop": 0.3,
+    "wd": 0.001,
+    "lr": 0.001
+   }
+  },
+  "n_sklearn": 80,
+  "n_torch": 36
+ }
+}

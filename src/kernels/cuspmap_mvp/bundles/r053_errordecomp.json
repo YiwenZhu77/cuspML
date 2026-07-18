@@ -1,0 +1,57 @@
+{
+ "rmse_random": 1.2462070681902186,
+ "groupings": [
+  {
+   "time": "day",
+   "mlt_bin_hr": 0.25,
+   "sigma_wg": 1.3214557023535232,
+   "n_groups": 8293,
+   "n_crossings": 20223,
+   "implied_model_floor": 0.0
+  },
+  {
+   "time": "day",
+   "mlt_bin_hr": 0.5,
+   "sigma_wg": 1.3139734805923053,
+   "n_groups": 9669,
+   "n_crossings": 27614,
+   "implied_model_floor": 0.0
+  },
+  {
+   "time": "day",
+   "mlt_bin_hr": 1.0,
+   "sigma_wg": 1.367407326065475,
+   "n_groups": 9069,
+   "n_crossings": 32661,
+   "implied_model_floor": 0.0
+  },
+  {
+   "time": "3hr",
+   "mlt_bin_hr": 0.25,
+   "sigma_wg": 0.5573282437420144,
+   "n_groups": 4683,
+   "n_crossings": 10127,
+   "implied_model_floor": 1.1146377373544742
+  },
+  {
+   "time": "3hr",
+   "mlt_bin_hr": 0.5,
+   "sigma_wg": 0.5790125603882426,
+   "n_groups": 7342,
+   "n_crossings": 16787,
+   "implied_model_floor": 1.103529116842828
+  },
+  {
+   "time": "3hr",
+   "mlt_bin_hr": 1.0,
+   "sigma_wg": 0.6522810511727715,
+   "n_groups": 9058,
+   "n_crossings": 22976,
+   "implied_model_floor": 1.0618669818240911
+  }
+ ],
+ "sigma_wg_range": [
+  0.5573282437420144,
+  1.367407326065475
+ ]
+}
