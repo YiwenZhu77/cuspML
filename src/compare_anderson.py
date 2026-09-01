@@ -118,7 +118,10 @@ def compare(crossings):
                 c = np.polyfit(combined_tilt[sel], abs_eq[sel], 1)
                 r = np.corrcoef(combined_tilt[sel], abs_eq[sel])[0, 1]
                 print(f"  [{mlt_lo:.1f}-{mlt_hi:.1f}]  {c[0]:8.4f}  {r:6.3f}  {sel.sum():6d}")
-        print(f"Anderson 2024:       0.043-0.051 deg/deg (at cusp center MLT)")
+        # Newell 2006 report -0.043 (whole sample, mostly southern) and -0.046 (northern
+        # subset) against unsigned tilt; Anderson 2024 report ~+0.06 near noon in the
+        # hemisphere-signed convention used here (their Table 1).
+        print(f"Anderson 2024:       ~+0.06 deg/deg near noon (hemisphere-signed tilt)")
 
     if has_imf:
         print(f"\n--- IMF Effects ---")

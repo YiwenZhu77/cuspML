@@ -1,0 +1,56 @@
+{
+ "model": "equatorward_mlat_xgb",
+ "split": "random_seed42",
+ "n_shap": 2000,
+ "test_mae_deg": 0.9681,
+ "top_features": [
+  {
+   "feature": "newell_cf_mean60",
+   "mean_abs_shap": 1.0446
+  },
+  {
+   "feature": "dipole_tilt",
+   "mean_abs_shap": 0.3126
+  },
+  {
+   "feature": "imf_bz_mean15",
+   "mean_abs_shap": 0.2163
+  },
+  {
+   "feature": "newell_cf_int60",
+   "mean_abs_shap": 0.2077
+  },
+  {
+   "feature": "sw_pdyn",
+   "mean_abs_shap": 0.2071
+  },
+  {
+   "feature": "vBs_mean60",
+   "mean_abs_shap": 0.1646
+  },
+  {
+   "feature": "vBs_int60",
+   "mean_abs_shap": 0.111
+  },
+  {
+   "feature": "doy",
+   "mean_abs_shap": 0.1032
+  },
+  {
+   "feature": "imf_bz_delta60",
+   "mean_abs_shap": 0.0894
+  },
+  {
+   "feature": "hemi_code",
+   "mean_abs_shap": 0.0867
+  },
+  {
+   "feature": "imf_bz_mean30",
+   "mean_abs_shap": 0.0842
+  },
+  {
+   "feature": "imf_bx_mean60",
+   "mean_abs_shap": 0.0771
+  }
+ ]
+}

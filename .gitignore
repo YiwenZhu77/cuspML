@@ -21,3 +21,14 @@ aris/
 AUTO_REVIEW*.md
 PAPER_PLAN.md
 IDEA_REPORT.md
+raw/
+reproduce/data/
+main.aux
+main.fls
+main.fdb_latexmk
+figures_final/
+figregen_dev.pbs
+*.parquet
+*.npz
+*.bak_bugfix
+*.bak

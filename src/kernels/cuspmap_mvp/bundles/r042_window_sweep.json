@@ -1,0 +1,21 @@
+{
+ "n_rows": 39267,
+ "max60min": {
+  "n_features": 74,
+  "random_MAE": 0.9434162974357605,
+  "random_r": 0.8925429664762303,
+  "temporal_MAE": 1.1081620454788208
+ },
+ "max90min": {
+  "n_features": 92,
+  "random_MAE": 0.9150150418281555,
+  "random_r": 0.8983785185761638,
+  "temporal_MAE": 1.07664954662323
+ },
+ "max120min": {
+  "n_features": 110,
+  "random_MAE": 0.9041125774383545,
+  "random_r": 0.8999730917564843,
+  "temporal_MAE": 1.0736385583877563
+ }
+}

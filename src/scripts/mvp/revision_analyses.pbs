@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -N cuspml_rev
+#PBS -A P28100045
+#PBS -q casper
+#PBS -l select=1:ncpus=36:mem=64GB
+#PBS -l walltime=01:00:00
+#PBS -j oe
+#PBS -o /glade/work/yizhu/cuspML/output/revision_pbs.log
+
+# Heavy XGBoost re-run for the JGR revision. Login node forces OMP_NUM_THREADS=1
+# (single-thread, crawls); compute node with 32 OMP threads finishes in minutes.
+# Pure compute, all inputs on /glade/work -> no internet needed.
+export OMP_NUM_THREADS=32
+export MKL_NUM_THREADS=32
+cd /glade/work/yizhu/cuspML
+PY=/glade/u/home/yizhu/work/miniconda3/envs/py3.10/bin/python
+
+echo "=== $(date) START r042 (A1 window sweep) ==="
+$PY -u src/scripts/mvp/r042_window_sweep.py
+echo "=== $(date) START r040 (A2-A6) ==="
+$PY -u src/scripts/mvp/r040_revision_analyses.py
+echo "=== $(date) ALL DONE ==="

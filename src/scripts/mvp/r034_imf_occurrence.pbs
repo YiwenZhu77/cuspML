@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -N r034_imf_occ
+#PBS -A P28100045
+#PBS -q develop
+#PBS -l job_priority=regular
+#PBS -l select=1:ncpus=64:ompthreads=1:mem=180GB
+#PBS -l walltime=01:00:00
+#PBS -j oe
+#PBS -o /glade/work/yizhu/cuspML/output/r034_imf_occ_cand.out
+
+cd /glade/work/yizhu/cuspML
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+/glade/u/home/yizhu/work/miniconda3/envs/py3.10/bin/python \
+  src/scripts/mvp/r034_imf_occurrence_parallel.py --workers 48 --flux-std 2e7 --suffix _cand
+echo "R034 DONE exit=$?"

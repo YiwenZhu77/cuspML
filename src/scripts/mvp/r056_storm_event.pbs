@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N r052_storm
+#PBS -A P28100045
+#PBS -q casper
+#PBS -l select=1:ncpus=36:mem=120GB
+#PBS -l walltime=01:30:00
+#PBS -j oe
+#PBS -o /glade/work/yizhu/cuspML/src/scripts/mvp/r052_storm_event.log
+
+set -e
+source /glade/u/home/yizhu/work/miniconda3/etc/profile.d/conda.sh
+conda activate py3.10
+cd /glade/work/yizhu/cuspML
+echo "START $(date) on $(hostname)"
+python src/scripts/mvp/r056_storm_event_split.py
+echo "DONE $(date)"

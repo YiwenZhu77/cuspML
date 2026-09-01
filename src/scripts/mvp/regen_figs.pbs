@@ -1,0 +1,25 @@
+#!/bin/bash
+#PBS -N cuspml_figs
+#PBS -A P28100045
+#PBS -q casper
+#PBS -l select=1:ncpus=16:mem=48GB
+#PBS -l walltime=00:40:00
+#PBS -j oe
+#PBS -o /glade/work/yizhu/cuspML/output/regen_figs_pbs.log
+export OMP_NUM_THREADS=16 MKL_NUM_THREADS=16
+PY=/glade/u/home/yizhu/work/miniconda3/envs/py3.10/bin/python
+cd /glade/work/yizhu/cuspML
+
+echo "=== generate_figures.py (fig01-05, Fig1b fix + fonts) ==="
+cd scripts && $PY generate_figures.py && cd ..
+echo "=== gen_figures_batch2.py (fig07, fig09 controlled-NN + fonts) ==="
+$PY src/gen_figures_batch2.py
+
+# Copy only the figures we regenerated into the paper (keep r043 fig06 + existing fig10).
+for f in fig01_data_coverage fig02_scatter_4panel fig03_baseline_comparison \
+         fig04_error_distribution fig05_feature_importance \
+         fig07_partial_dependence fig09_model_comparison; do
+  if [ -f figures/$f.png ]; then cp figures/$f.png paper/figures/$f.png; echo "copied $f"; fi
+  [ -f figures/$f.pdf ] && cp figures/$f.pdf paper/figures/$f.pdf
+done
+echo "=== FIGS DONE ==="

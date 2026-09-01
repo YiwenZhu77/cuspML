@@ -1,0 +1,30 @@
+{
+ "n_rows": 39668,
+ "n_events": 940,
+ "n_storm_crossings": 13534,
+ "params": {
+  "DST_THR": -30.0,
+  "ONSET_LVL": -15.0,
+  "RECOV_LVL": -20.0,
+  "RECOV_H": 6,
+  "MERGE_H": 24
+ },
+ "event_groupkfold": {
+  "MAE_mean": 1.2322,
+  "MAE_std": 0.0178,
+  "per_fold": [
+   1.2186,
+   1.2635,
+   1.2363,
+   1.2122,
+   1.2304
+  ]
+ },
+ "event_groupshuffle_80_20": 1.2228,
+ "leave_one_storm_out": {
+  "MAE_mean": 1.378,
+  "MAE_std": 0.3488,
+  "n_storms": 96,
+  "min_test": 40
+ }
+}

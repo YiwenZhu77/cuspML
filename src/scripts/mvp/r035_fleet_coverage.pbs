@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N r035_cov
+#PBS -A P28100045
+#PBS -q develop
+#PBS -l job_priority=regular
+#PBS -l select=1:ncpus=64:ompthreads=1:mem=180GB
+#PBS -l walltime=01:00:00
+#PBS -j oe
+#PBS -o /glade/work/yizhu/cuspML/output/r035_cov.out
+cd /glade/work/yizhu/cuspML
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+/glade/u/home/yizhu/work/miniconda3/envs/py3.10/bin/python src/scripts/mvp/r035_fleet_coverage_unrestricted.py --workers 48
+echo "R035 DONE exit=$?"

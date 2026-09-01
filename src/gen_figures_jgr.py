@@ -19,12 +19,12 @@ warnings.filterwarnings("ignore")
 
 # ── JGR:MLC style (matplotlib defaults, no seaborn) ──────────────────────────
 plt.rcParams.update({
-    'font.size': 9,
-    'axes.labelsize': 10,
-    'axes.titlesize': 10,
-    'xtick.labelsize': 8,
-    'ytick.labelsize': 8,
-    'legend.fontsize': 8,
+    'font.size': 11,
+    'axes.labelsize': 12,
+    'axes.titlesize': 12,
+    'xtick.labelsize': 10,
+    'ytick.labelsize': 10,
+    'legend.fontsize': 10,
     'figure.dpi': 300,
     'savefig.dpi': 300,
     'savefig.bbox': 'tight',
@@ -130,7 +130,7 @@ for i_s, sat in enumerate(sats):
 
 ax.set_xlabel("Year")
 ax.set_ylabel("Number of Crossings")
-ax.legend(ncol=3, fontsize=6, loc='upper left', frameon=True, framealpha=0.9, edgecolor='gray')
+ax.legend(ncol=3, fontsize=9, loc='upper left', frameon=True, framealpha=0.9, edgecolor='gray')
 ax.text(0.02, 0.97, r"$\bf{(a)}$", transform=ax.transAxes, fontsize=11, va='top')
 
 # (b) Polar plot: MLT angle (noon at top), |MLAT| radius (90 center, 60 edge)
@@ -139,12 +139,13 @@ ax2 = fig.add_subplot(122, polar=True)
 mlt_all = df_clean['eq_mlt'].values
 mlat_all = df_clean['abs_eq_mlat'].values
 
-# MLT -> theta: noon (12) at top
-theta_all = (mlt_all / 24.0) * 2 * np.pi
+# MLT -> theta for a view looking down on the N magnetic pole: noon (12 MLT) at
+# top, dusk (18) left, midnight (00) bottom, dawn (06) right.
+theta_all = ((mlt_all - 12.0) / 24.0) * 2 * np.pi
 r_all = 90 - mlat_all
 
 # 2D histogram for density
-theta_bins = np.linspace(0, 2*np.pi, 49)
+theta_bins = np.linspace(-np.pi, np.pi, 49)
 r_bins = np.linspace(0, 30, 31)
 H, te, re = np.histogram2d(theta_all, r_all, bins=[theta_bins, r_bins])
 H = H.T
@@ -153,13 +154,13 @@ H_masked = np.ma.masked_where(H == 0, H)
 T, R = np.meshgrid(te, re)
 im = ax2.pcolormesh(T, R, H_masked, cmap='jet', rasterized=True)
 
-ax2.set_theta_zero_location('N')  # noon at top
-ax2.set_theta_direction(-1)       # clockwise
+ax2.set_theta_zero_location('N')  # 12 MLT (noon) at top
+ax2.set_theta_direction(1)        # ccw: dusk (18) left, dawn (06) right
 ax2.set_ylim(0, 30)
 ax2.set_yticks([5, 10, 15, 20, 25])
-ax2.set_yticklabels(['85\u00b0', '80\u00b0', '75\u00b0', '70\u00b0', '65\u00b0'], fontsize=7)
-ax2.set_xticks(np.array([0, 6, 12, 18]) / 24.0 * 2 * np.pi)
-ax2.set_xticklabels(['12', '18', '00', '06'], fontsize=8)
+ax2.set_yticklabels(['85\u00b0', '80\u00b0', '75\u00b0', '70\u00b0', '65\u00b0'], fontsize=9)
+ax2.set_xticks(((np.array([0, 6, 12, 18]) - 12.0) / 24.0) * 2 * np.pi)
+ax2.set_xticklabels(['00', '06', '12', '18'], fontsize=10)
 ax2.grid(True, alpha=0.3)
 
 cbar = plt.colorbar(im, ax=ax2, pad=0.1, shrink=0.8)
@@ -178,7 +179,7 @@ print("  -> fig01 saved.")
 # FIGURE 2: Observed vs Predicted (7x6, 2x2)
 # ═════════════════════════════════════════════════════════════════════════════
 print("Figure 2: Observed vs Predicted...")
-fig, axes = plt.subplots(2, 2, figsize=(7, 6))
+fig, axes = plt.subplots(2, 2, figsize=(8, 6.8))
 panel_labels = [r'$\bf{(a)}$ Equatorward MLAT', r'$\bf{(b)}$ Poleward MLAT',
                 r'$\bf{(c)}$ Equatorward MLT', r'$\bf{(d)}$ Mean MLT']
 
@@ -199,7 +200,7 @@ for i, ax in enumerate(axes.flat):
     mae_i = mean_absolute_error(obs, pred)
     unit = TGT_UNITS[i]
     ax.text(0.05, 0.95, f"r = {r:.3f}\nMAE = {mae_i:.2f}{unit}",
-            transform=ax.transAxes, va='top', fontsize=8,
+            transform=ax.transAxes, va='top', fontsize=10,
             bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9, edgecolor='none'))
     ax.text(0.05, 0.05, panel_labels[i], transform=ax.transAxes, va='bottom', fontsize=9)
     ax.set_xlabel(f"Observed ({TGT_UNITS[i]})")
@@ -231,11 +232,11 @@ mu, std = residuals.mean(), residuals.std()
 x_fit = np.linspace(residuals.min(), residuals.max(), 200)
 ax.plot(x_fit, stats.norm.pdf(x_fit, mu, std), 'r-', linewidth=1.5, label='Gaussian fit')
 ax.text(0.97, 0.95, f"$\\mu$ = {mu:.3f}\u00b0\n$\\sigma$ = {std:.3f}\u00b0",
-        transform=ax.transAxes, va='top', ha='right', fontsize=8,
+        transform=ax.transAxes, va='top', ha='right', fontsize=10,
         bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9, edgecolor='none'))
 ax.set_xlabel("Residual (\u00b0)")
 ax.set_ylabel("Density")
-ax.legend(fontsize=8, frameon=True, framealpha=0.8, edgecolor='gray')
+ax.legend(fontsize=10, frameon=True, framealpha=0.8, edgecolor='gray')
 ax.text(0.02, 0.97, r"$\bf{(a)}$", transform=ax.transAxes, fontsize=11, va='top')
 
 # (b) CDF of |error|
@@ -247,7 +248,7 @@ for thr in [1, 2, 3]:
     pct = (abs_err <= thr).mean() * 100
     ax.axvline(thr, color='gray', linestyle='--', linewidth=0.8, alpha=0.7)
     ax.annotate(f"{pct:.1f}%", xy=(thr, pct), xytext=(thr + 0.3, pct - 8),
-                fontsize=7, color='#333333',
+                fontsize=9, color='#333333',
                 arrowprops=dict(arrowstyle='->', color='gray', lw=0.5))
 ax.set_xlabel("|Error| (\u00b0)")
 ax.set_ylabel("Cumulative %")
@@ -281,19 +282,19 @@ top15_feats = [feats[i] for i in top15_idx]
 top15_imp = importances[top15_idx]
 top15_pct = top15_imp / total_imp * 100
 
-fig, axes = plt.subplots(1, 2, figsize=(7, 4))
+fig, axes = plt.subplots(1, 2, figsize=(8, 4))
 
 # (a) Top 15 horizontal bars, single color (tab10[0] blue)
 ax = axes[0]
 y_pos = np.arange(15)[::-1]
 ax.barh(y_pos, top15_pct, color=COLORS[0], edgecolor='none', height=0.7)
 ax.set_yticks(y_pos)
-ax.set_yticklabels(top15_feats, fontsize=7)
+ax.set_yticklabels(top15_feats, fontsize=9)
 ax.set_xlabel("Relative Importance (%)")
 # Annotate percentage at bar end
 for i_b in range(15):
     ax.text(top15_pct[i_b] + 0.3, y_pos[i_b], f"{top15_pct[i_b]:.1f}%",
-            va='center', fontsize=7)
+            va='center', fontsize=9)
 ax.set_xlim(0, top15_pct[0] * 1.2)
 ax.text(0.02, 0.97, r"$\bf{(a)}$", transform=ax.transAxes, fontsize=11, va='top')
 
@@ -325,7 +326,7 @@ pd_labels = ["Dipole Tilt (\u00b0)", "Newell CF 60-min Mean", "IMF $B_z$ (nT)",
              "$P_{dyn}$ (nPa)", "IMF $B_y$ (nT)", "$v B_s$ 60-min Mean"]
 panel_letters = [r'$\bf{(a)}$', r'$\bf{(b)}$', r'$\bf{(c)}$', r'$\bf{(d)}$', r'$\bf{(e)}$', r'$\bf{(f)}$']
 
-fig, axes = plt.subplots(2, 3, figsize=(7, 4.5))
+fig, axes = plt.subplots(2, 3, figsize=(9, 5.2))
 
 X_median = np.median(X_tr, axis=0)
 eq_model = m.estimators_[0]  # eq_MLAT sub-model
@@ -420,11 +421,11 @@ colors_m = [cmap_bar(i / (n_mod - 1)) for i in range(n_mod)]
 
 ax.barh(y_pos, maes, color=colors_m, edgecolor='none', height=0.65)
 ax.set_yticks(y_pos)
-ax.set_yticklabels(names, fontsize=8)
+ax.set_yticklabels(names, fontsize=10)
 ax.set_xlabel("MAE (\u00b0)")
 
 for i_m, (name, mae_v) in enumerate(models_comp):
-    ax.text(mae_v + 0.02, y_pos[i_m], f"{mae_v:.3f}", va='center', fontsize=7)
+    ax.text(mae_v + 0.02, y_pos[i_m], f"{mae_v:.3f}", va='center', fontsize=9)
 
 # Vertical dashed red line at XGBoost MAE
 ax.axvline(xgb_mae_eq, color='red', linestyle='--', linewidth=1.0, alpha=0.7)
@@ -470,7 +471,7 @@ ax.set_xlabel("AE Index Bin (nT)")
 ax.set_ylabel("MAE (\u00b0)")
 for i_b, (bar, cnt) in enumerate(zip(bars, ae_counts)):
     ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02,
-            f"n={cnt}", ha='center', va='bottom', fontsize=7)
+            f"n={cnt}", ha='center', va='bottom', fontsize=9)
 ax.text(0.02, 0.97, r"$\bf{(a)}$", transform=ax.transAxes, fontsize=11, va='top')
 
 # (b) LOYO: scatter+line by year, color by solar cycle
@@ -490,7 +491,7 @@ for yr in years_all:
     y_lo_tr = y[tr_mask, 0]
     X_lo_te = X[te_mask]
     y_lo_te = y[te_mask, 0]
-    m_lo = XGBRegressor(n_estimators=500, max_depth=7, learning_rate=0.03,
+    m_lo = XGBRegressor(n_estimators=1000, max_depth=8, learning_rate=0.02,
                          subsample=0.8, colsample_bytree=0.7, reg_alpha=0.1,
                          reg_lambda=1.0, min_child_weight=5, random_state=42,
                          n_jobs=8, verbosity=0)
@@ -523,7 +524,7 @@ for yr_start, yr_end, color in [(1986, 1996.5, '#e6550d'),
 ax.plot(loyo_years, loyo_maes, '-', color='#666666', linewidth=0.8, zorder=1)
 ax.scatter(loyo_years, loyo_maes, c=sc_colors, s=30, zorder=2, edgecolors='white', linewidths=0.3)
 ax.axhline(overall_loyo, color='#333333', linestyle='--', linewidth=0.8, alpha=0.6)
-ax.text(loyo_years[-1] + 0.5, overall_loyo, f"mean={overall_loyo:.3f}\u00b0", fontsize=7, va='center')
+ax.text(loyo_years[-1] + 0.5, overall_loyo, f"mean={overall_loyo:.3f}\u00b0", fontsize=9, va='center')
 
 ax.set_xlabel("Year")
 ax.set_ylabel("LOYO MAE (\u00b0)")
@@ -535,7 +536,7 @@ sc_legend = [
     Line2D([0], [0], marker='o', color='w', markerfacecolor='#3182bd', markersize=6, label='SC 23'),
     Line2D([0], [0], marker='o', color='w', markerfacecolor='#31a354', markersize=6, label='SC 24'),
 ]
-ax.legend(handles=sc_legend, fontsize=8, loc='upper right', frameon=True, framealpha=0.8, edgecolor='gray')
+ax.legend(handles=sc_legend, fontsize=10, loc='upper right', frameon=True, framealpha=0.8, edgecolor='gray')
 
 fig.tight_layout()
 fig.savefig(f'{OUTDIR}/fig07_activity_temporal.png')

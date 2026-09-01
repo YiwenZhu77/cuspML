@@ -1,0 +1,23 @@
+{
+  "summary": {
+    "n_eval": 200,
+    "synth": {
+      "median_peak_dist_deg": 2.415360117782263,
+      "p90_peak_dist_deg": 7.973035249994961,
+      "frac_top10": 0.485,
+      "frac_top1pct": 0.68,
+      "mean_logp_true": -5.345073367282237,
+      "improvement_over_uniform": 2.2150070977395906
+    },
+    "real": {
+      "median_peak_dist_deg": 31.443404863971196,
+      "p90_peak_dist_deg": 51.79471383646992,
+      "frac_top10": 0.005,
+      "frac_top1pct": 0.02,
+      "mean_logp_true": -8.627317331016917,
+      "improvement_over_uniform": -1.0672368659950893
+    }
+  },
+  "gate_pass": false,
+  "gate_strong": false
+}

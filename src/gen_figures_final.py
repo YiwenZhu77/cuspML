@@ -481,7 +481,7 @@ for yr in years_all:
     y_lo_tr = y[tr_mask, 0]
     X_lo_te = X[te_mask]
     y_lo_te = y[te_mask, 0]
-    m_lo = XGBRegressor(n_estimators=500, max_depth=7, learning_rate=0.03,
+    m_lo = XGBRegressor(n_estimators=1000, max_depth=8, learning_rate=0.02,
                          subsample=0.8, colsample_bytree=0.7, reg_alpha=0.1,
                          reg_lambda=1.0, min_child_weight=5, random_state=42,
                          n_jobs=8, verbosity=0)

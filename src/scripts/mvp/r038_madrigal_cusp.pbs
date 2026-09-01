@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N r038_madrigal
+#PBS -A P28100045
+#PBS -q develop
+#PBS -l job_priority=regular
+#PBS -l select=1:ncpus=64:ompthreads=1:mem=180GB
+#PBS -l walltime=01:00:00
+#PBS -j oe
+#PBS -o /glade/work/yizhu/cuspML/output/r038_madrigal.out
+cd /glade/work/yizhu/cuspML
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+/glade/u/home/yizhu/work/miniconda3/envs/py3.10/bin/python src/scripts/mvp/r038_madrigal_cusp_occupancy.py --workers 48
+echo "R038 DONE exit=$?"

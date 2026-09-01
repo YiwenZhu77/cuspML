@@ -109,13 +109,12 @@ for i, lbl in enumerate(target_labels):
 # Fig 1: Data Coverage Map
 # ═══════════════════════════════════════════════════════════════════════════
 print("Generating Fig 1...")
-fig, axes = plt.subplots(1, 2, figsize=(14, 5.5),
-                         gridspec_kw={'width_ratios': [1.2, 1]})
+fig = plt.figure(figsize=(15, 5))
+gs = fig.add_gridspec(1, 3, width_ratios=[1.5, 1, 1])
 
-# ── Top panel: histogram by year and satellite ──
-ax = axes[0]
+# ── (a) histogram by year and satellite ──
+ax = fig.add_subplot(gs[0, 0])
 sats = sorted(df['satellite'].unique())
-# Use a categorical colormap
 cmap_sat = plt.cm.tab20
 sat_colors = {s: cmap_sat(i / max(len(sats)-1, 1)) for i, s in enumerate(sats)}
 
@@ -129,43 +128,29 @@ for sat in sats:
 ax.set_xlabel('Year')
 ax.set_ylabel('Number of Crossings')
 ax.set_title('(a) Cusp Crossings by Year and Satellite')
-ax.legend(ncol=3, fontsize=7, loc='upper left', framealpha=0.9)
+ax.legend(ncol=3, fontsize=8, loc='upper left', framealpha=0.9)
 ax.set_xlim(1986.5, 2014.5)
 
-# ── Bottom panel: polar scatter ──
-ax2 = fig.add_subplot(122, projection='polar')
-axes[1].remove()
+# ── (b) N and (c) S hemisphere dials, each a view from above the pole:
+#    noon (12 MLT) at top, dusk (18) at left, midnight (00) at bottom, dawn (06)
+#    at right; radius = 90 - |MLAT|, so higher latitude is toward the center.
+def mlt_dial(ax_p, mask, title, color):
+    theta = ((df['eq_mlt'].values[mask] - 12) / 24.0) * 2 * np.pi
+    r = 90 - df['eq_mlat'].abs().values[mask]
+    ax_p.scatter(theta, r, s=2, alpha=0.35, c=color, rasterized=True)
+    ax_p.set_theta_zero_location('N')   # 12 MLT (noon) at top
+    ax_p.set_theta_direction(1)          # ccw: dusk (18) left, dawn (06) right
+    ax_p.set_rlim(0, 30)
+    ax_p.set_rticks([5, 10, 15, 20, 25])
+    ax_p.set_yticklabels(['85°', '80°', '75°', '70°', '65°'], fontsize=9)
+    ax_p.set_xticks(((np.array([0, 6, 12, 18]) - 12) / 24.0) * 2 * np.pi)
+    ax_p.set_xticklabels(['00', '06', '12', '18'], fontsize=11)
+    ax_p.set_title(f'{title}\n($n={int(mask.sum()):,}$)', pad=16)
 
-theta = df['eq_mlt'].values * (2 * np.pi / 24)  # MLT to radians (0 MLT = 0 rad)
-# Rotate so noon (12 MLT) is at top
-theta_plot = theta - np.pi/2  # put 6 MLT at top; we want 12 at top
-theta_plot = (df['eq_mlt'].values / 24) * 2 * np.pi  # 0-24h -> 0-2pi
-# Convention: 12 MLT at top means theta=0 corresponds to 12 MLT
-theta_plot = ((df['eq_mlt'].values - 12) / 24) * 2 * np.pi + np.pi/2
-# Simpler: just use standard polar with 12h at top
-theta_plot = (df['eq_mlt'].values / 24) * 2 * np.pi
-
-r = 90 - df['eq_mlat'].abs().values  # radius: 0 at pole, 30 at 60°
-
-sc = ax2.scatter(theta_plot, r, c=df['hemi_code'].values, cmap='coolwarm',
-                 s=1, alpha=0.3, rasterized=True)
-ax2.set_theta_zero_location('S')  # 0 MLT at bottom
-ax2.set_theta_direction(-1)  # clockwise
-ax2.set_rlim(0, 30)
-ax2.set_rticks([5, 10, 15, 20, 25, 30])
-ax2.set_yticklabels(['85°', '80°', '75°', '70°', '65°', '60°'], fontsize=8)
-# MLT labels
-ax2.set_xticks(np.linspace(0, 2*np.pi, 24, endpoint=False))
-ax2.set_xticklabels([f'{h}' for h in range(24)], fontsize=7)
-ax2.set_title('(b) Crossing Locations (MLAT-MLT)', pad=20)
-
-# Legend for hemispheres
-legend_elements = [Line2D([0], [0], marker='o', color='w', markerfacecolor='steelblue',
-                          markersize=5, label='North'),
-                   Line2D([0], [0], marker='o', color='w', markerfacecolor='indianred',
-                          markersize=5, label='South')]
-ax2.legend(handles=legend_elements, loc='lower right', fontsize=9,
-           bbox_to_anchor=(1.15, -0.05))
+axN = fig.add_subplot(gs[0, 1], projection='polar')
+mlt_dial(axN, (df['hemi_code'].values == 1), '(b) Northern Hemisphere', 'steelblue')
+axS = fig.add_subplot(gs[0, 2], projection='polar')
+mlt_dial(axS, (df['hemi_code'].values == 0), '(c) Southern Hemisphere', 'indianred')
 
 plt.tight_layout()
 fig.savefig(f'{FIGDIR}/fig01_data_coverage.png')

@@ -70,18 +70,34 @@ def main():
     print(f"  total spectra: {len(spectra)}  (pos {int(spectra['cusp_mask'].sum())}, "
           f"neg {int(len(spectra) - spectra['cusp_mask'].sum())})")
 
-    # stratified sample 1 pos : K neg
+    # stratified sample 1 pos : K neg, with negatives stratified to match
+    # positive lat distribution (avoids "orbital duty cycle" prior contamination).
     rng = np.random.default_rng(args.seed)
     pos = spectra[spectra["cusp_mask"] == 1].reset_index(drop=True)
     neg = spectra[spectra["cusp_mask"] == 0].reset_index(drop=True)
     if args.max_pos and len(pos) > args.max_pos:
         idx = rng.choice(len(pos), args.max_pos, replace=False)
         pos = pos.iloc[idx].reset_index(drop=True)
-    n_neg_keep = min(len(pos) * args.k_neg, len(neg))
-    neg_idx = rng.choice(len(neg), n_neg_keep, replace=False)
-    neg = neg.iloc[neg_idx].reset_index(drop=True)
+
+    # bin lat at 2-degree resolution; for each bin, sample K * n_pos_in_bin negatives
+    lat_bins = np.arange(50, 91, 2.0)  # 50, 52, ..., 90
+    pos_bin = np.digitize(pos["abs_mlat"].values, lat_bins)
+    neg_bin = np.digitize(neg["abs_mlat"].values, lat_bins)
+    neg_keep_idx = []
+    for b in np.unique(pos_bin):
+        n_pos_b = int((pos_bin == b).sum())
+        n_target = n_pos_b * args.k_neg
+        avail = np.where(neg_bin == b)[0]
+        if len(avail) == 0:
+            continue
+        take = min(n_target, len(avail))
+        chosen = rng.choice(avail, take, replace=False)
+        neg_keep_idx.extend(chosen.tolist())
+    neg = neg.iloc[neg_keep_idx].reset_index(drop=True)
     sample = pd.concat([pos, neg], ignore_index=True).sample(frac=1.0, random_state=args.seed).reset_index(drop=True)
-    print(f"  stratified sample: {len(sample)} rows ({len(pos)} pos / {len(neg)} neg)")
+    print(f"  lat-stratified sample: {len(sample)} rows ({len(pos)} pos / {len(neg)} neg)")
+    print(f"  pos lat: mean={pos['abs_mlat'].mean():.1f}, std={pos['abs_mlat'].std():.1f}")
+    print(f"  neg lat: mean={neg['abs_mlat'].mean():.1f}, std={neg['abs_mlat'].std():.1f}")
 
     # load OMNI 1-min for the years involved
     print("[R021] loading + processing 1-min OMNI ...")
@@ -141,10 +157,21 @@ def main():
     feats = list(dict.fromkeys(feats))
     print(f"  features: {len(feats)}")
 
-    # drop rows with any NaN feature
+    # drop rows where ANY base SW feature is missing (these are not recoverable)
+    # but fill NaN in history/derived features with 0 (XGBoost handles partial features fine)
+    base_required = ["imf_bx", "imf_by", "imf_bz", "sw_v", "sw_n", "sw_pdyn"]
     before = len(sample)
-    sample = sample.dropna(subset=feats).reset_index(drop=True)
-    print(f"  dropna: {before} -> {len(sample)} rows (kept {100*len(sample)/before:.1f}%)")
+    sample = sample.dropna(subset=base_required).reset_index(drop=True)
+    n_after_base = len(sample)
+    print(f"  dropna(base only): {before} -> {n_after_base} rows (kept {100*n_after_base/before:.1f}%)")
+    hist_to_fill = [c for c in feats if c not in base_required]
+    sample[hist_to_fill] = sample[hist_to_fill].fillna(0.0)
+    # final NaN check
+    bad = sample[feats].isna().any(axis=1)
+    if bad.any():
+        print(f"  WARN: {bad.sum()} rows still have NaN after fillna, dropping")
+        sample = sample[~bad].reset_index(drop=True)
+    print(f"  final: {len(sample)} rows")
 
     X = sample[feats].values.astype(np.float32)
     y_lab = sample["cusp_mask"].values.astype(int)

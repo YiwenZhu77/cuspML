@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -N cuspml_r048
+#PBS -A P28100045
+#PBS -q casper
+#PBS -l select=1:ncpus=36:mem=64GB
+#PBS -l walltime=00:40:00
+#PBS -j oe
+#PBS -o /glade/work/yizhu/cuspML/output/r048_pbs.log
+export OMP_NUM_THREADS=32 MKL_NUM_THREADS=32
+cd /glade/work/yizhu/cuspML
+/glade/u/home/yizhu/work/miniconda3/envs/py3.10/bin/python -u src/scripts/mvp/r048_mlp_temporal.py
+echo "=== r048 DONE ==="

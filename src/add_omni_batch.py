@@ -42,13 +42,17 @@ def prep_omni(omni_data):
     """Pre-process OMNI data for fast matching."""
     epoch = np.array(omni_data["Epoch"])
     arrays = {}
-    for key, cdaw_key in [
-        ("imf_bx", "BX_GSE"), ("imf_by", "BY_GSM"), ("imf_bz", "BZ_GSM"),
-        ("sw_v", "flow_speed"), ("sw_n", "proton_density"), ("sw_pdyn", "Pressure"),
-        ("ae_index", "AE_INDEX"),
+    # OMNI_HRO_1MIN fill values are per-variable, NOT all >9999. Density fill is
+    # 999.99 and Pressure fill is 99.99, so a single >9999 cutoff let them leak into
+    # sw_n/sw_pdyn and poison every rolling-window feature. Filter each variable at a
+    # threshold safely above its physical range but below its fill value.
+    for key, cdaw_key, fill_above in [
+        ("imf_bx", "BX_GSE", 9999.0), ("imf_by", "BY_GSM", 9999.0), ("imf_bz", "BZ_GSM", 9999.0),
+        ("sw_v", "flow_speed", 9999.0), ("sw_n", "proton_density", 900.0),
+        ("sw_pdyn", "Pressure", 90.0), ("ae_index", "AE_INDEX", 9999.0),
     ]:
         arr = np.array(omni_data.get(cdaw_key, []), dtype=float)
-        arr[np.abs(arr) > 9999] = np.nan
+        arr[np.abs(arr) > fill_above] = np.nan
         arrays[key] = arr
 
     epoch_sec = epoch.astype("datetime64[s]").astype(np.int64)

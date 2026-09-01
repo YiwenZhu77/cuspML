@@ -17,7 +17,7 @@ SSJ/5 differences from SSJ/4:
   - Integration time is 1.0 s (vs 0.098 s for SSJ/4)
   - Same channel energies, widths, and channel shuffle order
 
-Supports downloading from NCEI and applying Anderson & Bukowski (2024) cusp criteria.
+Supports downloading from NCEI and applying Newell et al. (2006) cusp criteria.
 """
 
 import argparse
@@ -510,12 +510,12 @@ def download_ncei_day(satellite, date, cache_dir=None):
 
 
 # ---------------------------------------------------------------------------
-# Process one day with Anderson cusp criteria
+# Process one day with Newell (2006) cusp criteria (matches the CDAWeb path is Anderson - see NOTE)
 # ---------------------------------------------------------------------------
 
 def process_ncei_day(satellite, date, cache_dir=None):
     """
-    Download, parse, and apply Anderson (2024) cusp criteria to one day of
+    Download, parse, and apply Newell (2006) cusp criteria to one day of
     NCEI old-format SSJ data.
 
     Produces output compatible with identify_cusp.py's process_one_day().
