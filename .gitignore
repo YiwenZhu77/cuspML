@@ -32,3 +32,6 @@ figregen_dev.pbs
 *.npz
 *.bak_bugfix
 *.bak
+
+# agent config, not part of the artifact
+.claude/
