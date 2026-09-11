@@ -35,3 +35,10 @@ figregen_dev.pbs
 
 # agent config, not part of the artifact
 .claude/
+
+# Current outputs remain local; the immutable manuscript snapshot is distributed.
+reproduce/results/
+results/
+!reproduce/current/data/**/*.npz
+!reproduce/current/data/*.parquet
+!reproduce/current/data/**/*.parquet

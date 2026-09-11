@@ -1,15 +1,12 @@
 #!/bin/bash
-#PBS -N reprotest
+# Compatibility launcher. Submit reproduce/run.pbs from the repository root.
+#PBS -N cusp_reproduction_check
 #PBS -A P28100045
-#PBS -q develop
-#PBS -l select=1:ncpus=64:ompthreads=64
-#PBS -l walltime=00:40:00
+#PBS -q casper
+#PBS -l select=1:ncpus=4:mem=8GB
+#PBS -l walltime=00:10:00
 #PBS -j oe
-#PBS -o /glade/work/yizhu/cuspML/reproduce/run.log
-source /glade/u/home/yizhu/work/miniconda3/etc/profile.d/conda.sh
-conda activate py3.10
-cd /glade/work/yizhu/cuspML/reproduce
-export CUSPML_NJOBS=32
-echo "START $(date) on $(hostname)"
-python reproduce.py
-echo "REPRODONE $(date)"
+set -euo pipefail
+cd "${PBS_O_WORKDIR:?Submit this file from the repository root}"
+CUSPML_PYTHON=${CUSPML_PYTHON:-.venv/bin/python}
+exec "$CUSPML_PYTHON" -u reproduce/reproduce.py --output-dir "results/pbs-${PBS_JOBID}"

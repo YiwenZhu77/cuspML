@@ -1,0 +1,129 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-09-11",
+  "scope": "Training from the released processed crossing table, strict numerical verification, and generation of all manuscript figures. Raw DMSP decoding and label selection are outside this validation.",
+  "python": "3.10.16",
+  "versions": {
+    "python": "3.10.16",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "sklearn": "1.7.2",
+    "xgboost": "3.2.0"
+  },
+  "dependency_lock_sha256": "7b10edf166596d685347abdd764b9c8865d7bb9ee4b4487293469904f3038db9",
+  "manifest_sha256": "d7ba4335e393f018a1df9e28b1ff6bd6be68e88b2c361db43f0139421c52609c",
+  "rows_sha256": "e3f56a34b60cb52ea69ddd57735e349fae0df109ef166431069551b4adcaf875",
+  "snapshot_files_verified": 60,
+  "prediction_sets_verified": 53,
+  "grouped_test_folds": 34,
+  "n_features": 74,
+  "n_train": 29935,
+  "n_test": 9733,
+  "figures": [
+    "fig01_data_coverage",
+    "temporal_baseline",
+    "temporal_errors",
+    "temporal_hemisphere",
+    "temporal_importance",
+    "temporal_other_targets",
+    "temporal_pdp",
+    "temporal_residuals",
+    "temporal_scatter",
+    "temporal_windows"
+  ],
+  "explanation": "Tree SHAP, gain and all 150 PDP grid predictions recomputed and matched",
+  "primary_MAE": 1.1095330012882036,
+  "baseline_MAE": 1.748628477148995,
+  "reduction_pct": 36.54838544679243,
+  "training_wall_seconds": 771,
+  "sum_model_fit_seconds": 740.9941116340924,
+  "training_timing_note": "Initial complete training took 12 min 51 s on Casper. Ridge alone was refitted after selecting one-thread BLAS arithmetic; the published code includes this setting. No other models were refitted during that correction. Queue time is excluded.",
+  "blas_threads": {
+    "default": 6,
+    "MLP74": 6,
+    "Ridge74": 1
+  },
+  "tolerances": {
+    "individual_prediction_absolute": 0.0002,
+    "MAE_RMSE_r_absolute": 2e-05
+  },
+  "ridge_thread_witness": {
+    "1": {
+      "maxdiff": 0.0,
+      "mae": 1.3012623933411742,
+      "pass": true
+    },
+    "2": {
+      "maxdiff": 0.00018310546875,
+      "mae": 1.301262458010346,
+      "pass": true
+    },
+    "3": {
+      "maxdiff": 0.00112152099609375,
+      "mae": 1.3012626912112988,
+      "pass": false
+    },
+    "4": {
+      "maxdiff": 9.918212890625e-05,
+      "mae": 1.301262387854093,
+      "pass": true
+    },
+    "5": {
+      "maxdiff": 0.00121307373046875,
+      "mae": 1.3012630498312512,
+      "pass": false
+    },
+    "6": {
+      "maxdiff": 0.00104522705078125,
+      "mae": 1.3012626861161518,
+      "pass": false
+    }
+  },
+  "mlp_four_thread_witness": {
+    "pbs_jobid": "5899207.casper-pbs",
+    "threads": 4,
+    "elapsed_seconds": 15.194159660022706,
+    "n_iter": 120,
+    "actual": {
+      "n": 9733,
+      "MAE": 1.310953381102462,
+      "RMSE": 1.93996973512378,
+      "r": 0.7264557097218088,
+      "R2": 0.44620673678102274,
+      "mean": 0.08489740689758847,
+      "median": 0.05326080322265625,
+      "within1": 0.5083735744374808,
+      "within2": 0.8007808486592006,
+      "above3": 0.07767389294153909
+    },
+    "expected": {
+      "n": 9733,
+      "MAE": 1.3098050161291341,
+      "RMSE": 1.9152674107497116,
+      "r": 0.7309736935671564,
+      "R2": 0.46022023869117956,
+      "mean": -0.1717297702853192,
+      "median": -0.1864166259765625,
+      "within1": 0.49881845268673586,
+      "within2": 0.8024247405733073,
+      "above3": 0.07746840645227576
+    },
+    "metric_absolute_error": {
+      "MAE": 0.001148364973327931,
+      "RMSE": 0.024702324374068274,
+      "r": 0.004517983845347517,
+      "R2": 0.014013501910156823,
+      "mean": 0.2566271771829077,
+      "median": 0.23967742919921875,
+      "within1": 0.00955512175074491,
+      "within2": 0.0016438919141066322,
+      "above3": 0.00020548648926332902
+    },
+    "max_prediction_absolute_error": 5.75225830078125,
+    "prediction_pass": false,
+    "metric_pass": false,
+    "pass": false
+  },
+  "unit_tests_passed": 5,
+  "fresh_verification_sha256": "76f65e595b8706f1740fb18ea44e0dd9c40fd88114c947431f220dcb366c96a5"
+}

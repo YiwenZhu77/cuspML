@@ -1,14 +1,12 @@
 #!/bin/bash
-#PBS -N reprotest
+# Example for NCAR Casper; adapt account and queue for another installation.
+#PBS -N cusp_reproduction
 #PBS -A P28100045
 #PBS -q casper
-#PBS -l select=1:ncpus=16:mem=48GB
+#PBS -l select=1:ncpus=8:mem=16GB
 #PBS -l walltime=00:40:00
 #PBS -j oe
-#PBS -o /glade/work/yizhu/cuspML/reproduce/run.log
-source /glade/u/home/yizhu/work/miniconda3/etc/profile.d/conda.sh
-conda activate py3.10
-cd /glade/work/yizhu/cuspML/reproduce
-export CUSPML_NJOBS=16
-python reproduce.py
-echo "REPRODONE"
+set -euo pipefail
+cd "${PBS_O_WORKDIR:?Submit this file from the repository root}"
+CUSPML_PYTHON=${CUSPML_PYTHON:-.venv/bin/python}
+exec "$CUSPML_PYTHON" -u reproduce/reproduce.py --train --jobs 6 --output-dir "results/pbs-${PBS_JOBID}"

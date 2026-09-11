@@ -1,53 +1,35 @@
 # cuspML
 
-Machine learning prediction of ionospheric cusp boundary location from solar wind parameters.
+Machine learning prediction of ionospheric cusp precipitation boundaries from solar-wind measurements.
 
-This repository contains the analysis code for:
+Code for Zhu, Y., Michael, A. T., & Toffoletto, F. R., *Predicting Ionospheric Cusp Location from Solar Wind: An XGBoost Model Trained on 27 Years of DMSP Data* (JGR Space Physics, under review).
 
-> Zhu, Y., Michael, A. T., & Toffoletto, F. R. (2026). Predicting Ionospheric Cusp Location from Solar Wind: An XGBoost Model Trained on 27 Years of DMSP Data. *Journal of Geophysical Research: Space Physics* (under review).
+## Reproduce the revised manuscript
 
-## Data and trained models
+The current entry point uses the fixed temporal split: 29,935 crossings before 2008 for training and 9,733 crossings during 2008 through 2014 for testing. The main target is absolute equatorward boundary magnetic latitude. Three other targets are reported in the Supporting Information.
 
-The cusp crossing database (48,056 events, 1987–2014) and trained XGBoost model weights are archived at Zenodo:
+The **current processed inputs, primary temporal model, reference predictions and ordered feature manifest are included in this repository**, under [`reproduce/current/data`](reproduce/current/data). No external data download is required for this reproduction.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19340792.svg)](https://doi.org/10.5281/zenodo.19340792)
-
-Concept DOI (always points to latest version): `10.5281/zenodo.19340792`
-
-## Repository layout
-
-```
-src/                 Analysis source (Python)
-  identify_cusp.py     DMSP SSJ cusp boundary identification (Anderson 2024 criteria)
-  add_omni.py          OMNI solar wind feature matching
-  add_omni_batch.py    Batch OMNI matching driver
-  parse_ncei_ssj.py    NCEI DMSP SSJ binary file parser
-  tree_dse.py          Tree-model design space exploration (XGBoost / GBR / Ridge)
-  nn_dse.py            Neural network architecture search (MLP / ResMLP / TabTransformer)
-  compare_anderson.py  Cross-check against Anderson & Bukowski (2024) results
-  gen_figures_jgr.py   Generate paper figures
-  gen_figures_batch2.py
-  gen_figures_final.py
-
-scripts/             Helper scripts and utilities
-run_*.sh             PBS submission scripts for Derecho/Casper
+```bash
+python3.10 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r reproduce/current/requirements.txt
+# Verify checksums, predictions, SHAP and PDP, then render all 10 figures:
+python reproduce/reproduce.py --output-dir results/check
+# Independently train all models and controls, verify, then render:
+python reproduce/reproduce.py --train --jobs 6 --output-dir results/retrained
 ```
 
-## Reproducing the paper results
+Use a new output directory for each run. See the [complete reproduction instructions](reproduce/README.md) for the figure map, baseline calibration, history experiments, data definitions and verification scope.
 
-1. Download the cusp crossing database from Zenodo:
-   ```
-   wget https://zenodo.org/records/19780238/files/cusp_crossings_1987_2014.csv.zip
-   unzip cusp_crossings_1987_2014.csv.zip
-   ```
-2. Apply the feature derivations described in Section 2.2 of the paper (transverse IMF magnitude, IMF clock angle, Newell coupling function, Kan-Lee electric field, half-wave rectified `vBs`, hemisphere-adjusted `By`, day-of-year, and hemisphere code).
-3. Use the XGBoost hyperparameters reported in Section 2.3:
-   `n_estimators=1000, max_depth=8, learning_rate=0.02, subsample=0.8, colsample_bytree=0.7, reg_alpha=0.1, reg_lambda=1.0, min_child_weight=5, random_state=42`.
-4. With an 80/20 random split (`random_state=42`) the model reproduces MAE = 0.97° on the equatorward cusp boundary latitude. With a temporal split (train < 2008, test ≥ 2008) the temporal-holdout MAE is 1.11°.
+The primary temporal MAE is **1.109533 degrees**. The Newell (2006) coupling-function baseline gives **1.748628 degrees** on the same test crossings, corresponding to **36.5484% lower MAE**. The baseline is a local training-period calibration of the published function, not a comparison with a performance number reported by Newell et al.
 
-Pre-trained models (XGBoost `.ubj` format) are also included in the Zenodo archive (`cuspML_models.zip`).
+## Historical archive
+
+The [Zenodo data archive](https://doi.org/10.5281/zenodo.19340792) contains the earlier crossing catalog and random-split model package. Those files are **not interchangeable with the current temporal snapshot**. Historical reproduction code and recorded metrics are retained in [`reproduce/legacy`](reproduce/legacy); they are not the default manuscript workflow.
+
+The wider `src/` tree contains DMSP parsing, cusp identification, OMNI matching and exploratory analyses. The current reproduction starts from the released processed crossing table. It does not rerun raw satellite label identification or claim that the historical upstream pipeline has been independently revalidated.
 
 ## License
 
-Code: MIT License.
-Data and trained models: CC-BY-4.0 (via Zenodo).
+Code: [MIT](LICENSE). Released processed data and model weights: CC BY 4.0, with attribution to this study and the upstream DMSP/OMNI data providers.
