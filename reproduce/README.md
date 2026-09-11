@@ -25,7 +25,7 @@ python reproduce/current/verify.py --data-dir reproduce/current/data --run-dir r
 python reproduce/current/figures.py --data-dir reproduce/current/data --output-dir results/reference_figures
 ```
 
-The last command only renders the reference outputs; the combined entry point renders freshly trained predictions when `--train` is selected. `current/export_snapshot.py` is a maintainer-only export of existing author artifacts, not a required consumer step.
+The last command only renders the reference outputs; the combined entry point renders freshly trained predictions when `--train` is selected.
 
 ## Inputs and sample definitions
 
@@ -96,4 +96,4 @@ The ± values are population standard deviations across held-out folds. The firs
 
 ## Historical files
 
-`legacy/` retains the previous code and metrics for provenance. Earlier `src/gen_figures*` and exploratory scripts do not define the current manuscript figures. The previous Zenodo model package is random-trained and should not be passed to this entry point.
+Earlier code and exploratory analyses remain available in repository history, including commit `827c2c0`. They are not required by this reproduction. The previous Zenodo model package is random-trained and should not be passed to this entry point.

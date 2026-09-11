@@ -42,3 +42,12 @@ results/
 !reproduce/current/data/**/*.npz
 !reproduce/current/data/*.parquet
 !reproduce/current/data/**/*.parquet
+
+# Publish only the current reproduction package; retain research workspace locally.
+/*
+!/.gitignore
+!/README.md
+!/LICENSE
+!/reproduce/
+/reproduce/legacy/
+/reproduce/current/export_snapshot.py

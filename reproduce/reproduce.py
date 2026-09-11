@@ -1,7 +1,7 @@
 """Current manuscript entry point: verify temporal results and render all ten figures.
 
 Run from any directory. --train additionally refits every reported model/control.
-The old random-split experiment is preserved under legacy/, not used here.
+Historical experiments remain in repository history; this entry point uses the current temporal snapshot.
 """
 import argparse
 import shutil

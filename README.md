@@ -26,9 +26,9 @@ The primary temporal MAE is **1.109533 degrees**. The Newell (2006) coupling-fun
 
 ## Historical archive
 
-The [Zenodo data archive](https://doi.org/10.5281/zenodo.19340792) contains the earlier crossing catalog and random-split model package. Those files are **not interchangeable with the current temporal snapshot**. Historical reproduction code and recorded metrics are retained in [`reproduce/legacy`](reproduce/legacy); they are not the default manuscript workflow.
+The [Zenodo data archive](https://doi.org/10.5281/zenodo.19340792) contains the earlier crossing catalog and random-split model package. Those files are **not interchangeable with the current temporal snapshot**. Historical code remains available in the repository history, including commit `827c2c0`. The current branch contains only the processed-data reproduction workflow.
 
-The wider `src/` tree contains DMSP parsing, cusp identification, OMNI matching and exploratory analyses. The current reproduction starts from the released processed crossing table. It does not rerun raw satellite label identification or claim that the historical upstream pipeline has been independently revalidated.
+The current reproduction starts from the released processed crossing table. It does not rerun raw satellite label identification or claim that the historical upstream pipeline has been independently revalidated. Earlier upstream and exploratory scripts are available in the repository history.
 
 ## License
 
