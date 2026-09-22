@@ -2,7 +2,7 @@
 
 Machine learning prediction of ionospheric cusp precipitation boundaries from solar-wind measurements.
 
-Code for Zhu, Y., Michael, A. T., & Toffoletto, F. R., *Predicting Ionospheric Cusp Location from Solar Wind: An XGBoost Model Trained on 27 Years of DMSP Data* (JGR Space Physics, under review).
+Code for Zhu, Y., Michael, A. T., & Toffoletto, F. R., *Predicting Ionospheric Cusp Location from Solar Wind: An XGBoost Model Trained on 27 Years of DMSP Data*, Journal of Geophysical Research: Space Physics, accepted. DOI: [10.1029/2026JA035567](https://doi.org/10.1029/2026JA035567).
 
 ## Reproduce the revised manuscript
 
