@@ -279,6 +279,9 @@ class Renderer:
         ax.set_xlabel('Year'); ax.set_ylabel('Number of Crossings')
         ax.set_title('(a) Crossings by Year and Satellite')
         ax.legend(ncol=3,fontsize=8,loc='upper left',framealpha=0.9); ax.set_xlim(1986.5,2014.5)
+        # Stacked bars pin sticky edges at every segment bottom, which lets the
+        # tallest year (2003, 4,251 crossings) touch the axes frame; add headroom.
+        ax.set_ylim(0, float(bottom.max())*1.08)
 
         # (b)/(c) full-circle pole-view dials
         def dial(ax_p, mask, title, color):
